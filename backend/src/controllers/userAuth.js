@@ -1,6 +1,9 @@
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateLoginData, validateSignupData } from "../utils/validation.js";
+dotenv.config();
 
 export const createUser = async (req, res) => {
   try {
@@ -54,6 +57,9 @@ export const loginUser = async (req, res) => {
         message: "Invalid credentials",
       });
     }
+    //Token
+    const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY);
+    res.cookie("codesync", token);
     res.status(200).json({
       message: "Login Successful",
     });
