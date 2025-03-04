@@ -30,6 +30,11 @@ export const userAuthMiddleware = async (req, res, next) => {
     next();
   } catch (err) {
     //TODO: Logger Here why it failed
+    if (err.name === "TokenExpiredError") {
+      return res.status(419).json({
+        message: "Session expired, Please login again!",
+      });
+    }
     res.status(500).json({
       message: "Something went wrong",
     });
