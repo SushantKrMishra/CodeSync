@@ -1,9 +1,6 @@
-import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateLoginData, validateSignupData } from "../utils/validation.js";
-dotenv.config();
 
 export const createUser = async (req, res) => {
   try {
@@ -58,8 +55,10 @@ export const loginUser = async (req, res) => {
       });
     }
     //Token
-    const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY);
-    res.cookie("codesync", token);
+    const token = await user.getJWT();
+    res.cookie("codesync", token, {
+      expires: new Date(Date.now() + 3600000 * 48),
+    });
     res.status(200).json({
       message: "Login Successful",
     });
@@ -72,4 +71,13 @@ export const loginUser = async (req, res) => {
       message: "Something went wrong",
     });
   }
+};
+
+export const logoutUser = async (req, res) => {
+  res
+    .cookie("codesync", null, { expires: new Date(Date.now()) })
+    .status(200)
+    .json({
+      message: "Logged out successfully",
+    });
 };

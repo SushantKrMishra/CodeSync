@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto";
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import validator from "validator";
+dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
@@ -48,8 +51,19 @@ const userSchema = new mongoose.Schema(
       },
     },
     gender: { type: String, enum: ["Male", "Female"] },
+    about: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
+
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "2d",
+  });
+  return token;
+};
 
 export const User = mongoose.model("User", userSchema);

@@ -16,3 +16,12 @@ export const validateLoginData = (data) => {
   }
   return validator.isEmail(emailId);
 };
+
+export const validateProfileUpdateData = (data) => {
+  const allowedEditFeilds = ["age", "gender", "about", "firstName", "lastName"];
+  const isEditAllowed = Object.keys(data).every((item) =>
+    allowedEditFeilds.includes(item)
+  );
+  //Rest Validaion will be taken care by Schema as User.save() triggers schema validation
+  return isEditAllowed;
+};
