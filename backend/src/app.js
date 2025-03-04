@@ -7,6 +7,7 @@ const app = express();
 dotenv.config();
 const port = process.env.PORT || 5001;
 
+app.use(express.json());
 app.use("/open", userRoutes);
 
 app.use("/", (err, req, res, next) => {
