@@ -1,4 +1,6 @@
+import validator from "validator";
 import { User } from "../models/user.js";
+import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateProfileUpdateData } from "../utils/validation.js";
 
 export const getUsers = async (req, res) => {
@@ -31,7 +33,7 @@ export const getUser = async (req, res) => {
       gender: user.gender,
       userName: user.userName,
     });
-  } catch {
+  } catch (err) {
     //TODO: Logger Here why it failed
     res.status(500).json({
       message: "Something went wrong",
@@ -58,7 +60,98 @@ export const updateUserProfile = async (req, res) => {
       message: "Profile updated successfully",
       data: loggedInUser,
     });
-  } catch {
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+export const updateUserName = async (req, res) => {
+  try {
+    const { userName } = req.body;
+    if (!userName) {
+      return res.status(400).json({
+        message: "Bad request",
+      });
+    }
+
+    const doesUserNameExists = await User.find({
+      userName: userName,
+    });
+
+    if (doesUserNameExists.length > 0) {
+      return res.status(406).json({
+        message: "Username already taken!",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { userName: userName },
+      { runValidators: true, returnDocument: "after" }
+    );
+
+    if (!updatedUser) {
+      throw new Error("Unable to update user details");
+    }
+
+    res.status(200).json({
+      message: "Username updated successfully",
+      user: {
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        emailId: updatedUser.emailId,
+        userName: updatedUser.userName,
+        age: updatedUser.age,
+      },
+    });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+export const updateUserPasscode = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Bad request",
+      });
+    }
+    const isPasswordValid = await comparePassword(
+      currentPassword,
+      req.user.password
+    );
+
+    if (!isPasswordValid) {
+      return res.status(403).json({
+        message: "Forbidden",
+      });
+    }
+
+    if (!validator.isStrongPassword(newPassword)) {
+      return res.status(406).json({
+        message: "Please use a strong password",
+      });
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, {
+      password: await hashPassword(newPassword),
+    });
+    if (!user) {
+      throw new Error("Unable to update the passcode");
+    }
+    res
+      .cookie("codesync", null, { expires: new Date(Date.now()) })
+      .status(200)
+      .json({
+        message: "Password updated successfully",
+      });
+  } catch (err) {
     //TODO: Logger Here why it failed
     res.status(500).json({
       message: "Something went wrong",
