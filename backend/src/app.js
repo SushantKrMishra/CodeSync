@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./config/database.js";
 import { userAuthMiddleware } from "./middlewares/userAuth.js";
+import connectionRoutes from "./routes/connectionRoutes.js";
 import userAuthRoutes from "./routes/userAuthRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/open", userAuthRoutes);
 app.use("/api", userAuthMiddleware, userRoutes);
+app.use("/connection", userAuthMiddleware, connectionRoutes);
 
 app.use("/", (err, req, res, next) => {
   if (err) {
