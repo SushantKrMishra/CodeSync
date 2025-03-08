@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ConnectionRequest } from "../models/connectionRequest.js";
 import { User } from "../models/user.js";
 
@@ -112,6 +113,46 @@ export const handleConnectionRequest = async (req, res) => {
     res.status(200).json({
       message: `Successfully ${status} connection request`,
     });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+/**
+ *
+ * @param {*} res return users suggestions to follow
+ */
+export const connectionSuggestion = async (req, res) => {
+  try {
+    const interactedUser = await ConnectionRequest.find({
+      $or: [{ senderId: req.user._id }, { recieverId: req.user._id }],
+    });
+    const excludedUsers = new Set();
+    interactedUser.forEach((user) => {
+      excludedUsers.add(user.senderId.toString());
+      excludedUsers.add(user.recieverId.toString());
+    });
+    excludedUsers.add(req.user._id.toString());
+    const excludedObjectIds = Array.from(excludedUsers).map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+    const user = await User.aggregate([
+      { $match: { _id: { $nin: excludedObjectIds } } },
+      { $sample: { size: 10 } },
+      {
+        $project: {
+          _id: 1,
+          userName: 1,
+          firstName: 1,
+          lastName: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({ data: user });
   } catch (err) {
     //TODO: Logger Here why it failed
     res.status(500).json({
