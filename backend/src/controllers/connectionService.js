@@ -76,3 +76,46 @@ export const withdrawConnectionRequest = async (req, res) => {
     });
   }
 };
+
+export const handleConnectionRequest = async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const { id, status } = req.params;
+
+    if (!status || !id) {
+      return res.status(400).json({
+        message: "Bad request",
+      });
+    }
+
+    const allowedStatus = ["accepted", "rejected"];
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        message: "Bad request",
+      });
+    }
+
+    const connectionRequest = await ConnectionRequest.findOne({
+      _id: id,
+      recieverId: loggedInUser._id,
+      status: "pending",
+    });
+
+    if (!connectionRequest) {
+      return res.status(404).json({
+        message: "No Connection Request",
+      });
+    }
+
+    connectionRequest.status = status;
+    await connectionRequest.save();
+    res.status(200).json({
+      message: `Successfully ${status} connection request`,
+    });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};

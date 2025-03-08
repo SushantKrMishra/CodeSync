@@ -3,15 +3,17 @@ const connectionRequestSchema = new mongoose.Schema(
   {
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     recieverId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     status: {
       type: String,
-      enum: ["pending", "success", "rejected"],
+      enum: ["pending", "accepted", "rejected"],
       required: true,
     },
   },

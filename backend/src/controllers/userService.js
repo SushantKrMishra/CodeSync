@@ -1,4 +1,5 @@
 import validator from "validator";
+import { ConnectionRequest } from "../models/connectionRequest.js";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateProfileUpdateData } from "../utils/validation.js";
@@ -151,6 +152,77 @@ export const updateUserPasscode = async (req, res, next) => {
       .json({
         message: "Password updated successfully",
       });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+export const getRecievedConnectionRequest = async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const connectionRequests = await ConnectionRequest.find({
+      recieverId: loggedInUser._id,
+      status: "pending",
+    }).populate(["recieverId"], ["firstName", "lastName", "userName"]);
+    const data = connectionRequests.map((e) => e.recieverId);
+    res.status(200).json({
+      data,
+    });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+export const getSendConnectionRequest = async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const connectionRequests = await ConnectionRequest.find({
+      senderId: loggedInUser._id,
+      status: "pending",
+    }).populate(["recieverId"], ["firstName", "lastName", "userName"]);
+    const data = connectionRequests.map((e) => e.recieverId);
+    res.status(200).json({
+      data,
+    });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+export const getConnections = async (req, res) => {
+  try {
+    const connectionRequest = await ConnectionRequest.find({
+      $or: [
+        {
+          senderId: req.user._id,
+          status: "accepted",
+        },
+        {
+          recieverId: req.user._id,
+          status: "accepted",
+        },
+      ],
+    }).populate(
+      ["senderId", "recieverId"],
+      ["firstName", "lastName", "userName"]
+    );
+
+    const data = connectionRequest.map((e) => {
+      if (e.senderId._id.toString() === req.user._id.toString()) {
+        return e.recieverId;
+      }
+      return e.senderId;
+    });
+    res.status(200).json({ data });
   } catch (err) {
     //TODO: Logger Here why it failed
     res.status(500).json({
