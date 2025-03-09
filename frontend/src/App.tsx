@@ -12,12 +12,34 @@ function App() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          paddingTop: "70px",
         }}
       >
-        <Header />
-        <Box sx={{ flex: 1, backgroundColor: "#d8dada" }}>
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "70px",
+            backgroundColor: "white",
+            zIndex: 1000,
+          }}
+        >
+          <Header />
+        </Box>
+
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: "#d8dada",
+            overflowY: "auto",
+            height: "calc(100vh - 70px)",
+          }}
+        >
           <Body />
         </Box>
+
         <Footer />
       </Box>
     </BrowserRouter>
