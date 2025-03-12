@@ -2,6 +2,13 @@ import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateLoginData, validateSignupData } from "../utils/validation.js";
 
+export const sessionAuthValid = async (req, res) => {
+  //We are sure that user passed middleware check
+  res.status(200).json({
+    message: "User Validated",
+  });
+};
+
 export const createUser = async (req, res) => {
   try {
     const payload = req.body;

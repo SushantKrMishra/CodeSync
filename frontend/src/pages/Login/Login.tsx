@@ -1,52 +1,62 @@
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
+  Alert,
+  Box,
   Button,
+  Card,
   FormControl,
   IconButton,
   Input,
   InputAdornment,
   InputLabel,
+  Snackbar,
   TextField,
 } from "@mui/material";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import { validateEmailId } from "../../domain/utils";
 import { LoginFormState, useLogin } from "./hooks";
 
 export default function Login() {
   const { invoke, isError, isPending } = useLogin();
+  const navigate = useNavigate();
 
   const onLogin = (data: LoginFormState) => {
     invoke(data);
+    navigate("/");
   };
 
-  if (isError) {
-    return <>Something went wrong :| </>;
-  }
-
-  return <LoginView onSuccessfulValidation={onLogin} isPending={isPending} />;
+  return (
+    <LoginView
+      onSuccessfulValidation={onLogin}
+      isPending={isPending}
+      isError={isError}
+    />
+  );
 }
 
 type ViewProps = {
   onSuccessfulValidation: (formState: LoginFormState) => void;
   isPending: boolean;
+  isError: boolean;
 };
 
 const initialFormState: LoginFormState = {
-  emailId: "",
-  password: "",
+  emailId: "Sush4@test.com",
+  password: "Sush@123",
 };
 
 const LoginView: React.FC<ViewProps> = ({
   onSuccessfulValidation,
   isPending,
+  isError,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState<LoginFormState>(initialFormState);
   const [errors, setErrors] = useState<Partial<LoginFormState>>({});
+  const [errorOpen, setErrorOpen] = useState(false);
 
   const handleChange = (key: keyof LoginFormState, value: string) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
@@ -73,6 +83,12 @@ const LoginView: React.FC<ViewProps> = ({
 
     onSuccessfulValidation(formState);
   };
+
+  useEffect(() => {
+    if (isError) {
+      setErrorOpen(true);
+    }
+  }, [isError]);
 
   return (
     <>
@@ -181,7 +197,24 @@ const LoginView: React.FC<ViewProps> = ({
           </Box>
         </Card>
       </Box>
+
       <ApplyModal show={isPending} message="Processing your request..." />
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={errorOpen}
+        autoHideDuration={4000}
+        onClose={() => setErrorOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setErrorOpen(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Login failed! Please try again.
+        </Alert>
+      </Snackbar>
     </>
   );
 };
