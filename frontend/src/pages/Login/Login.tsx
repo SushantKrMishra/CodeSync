@@ -12,9 +12,10 @@ import {
   InputLabel,
   Snackbar,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import { validateEmailId } from "../../domain/utils";
 import { LoginFormState, useLogin } from "./hooks";
@@ -33,6 +34,7 @@ export default function Login() {
       onSuccessfulValidation={onLogin}
       isPending={isPending}
       isError={isError}
+      navigate={navigate}
     />
   );
 }
@@ -41,6 +43,7 @@ type ViewProps = {
   onSuccessfulValidation: (formState: LoginFormState) => void;
   isPending: boolean;
   isError: boolean;
+  navigate: NavigateFunction;
 };
 
 const initialFormState: LoginFormState = {
@@ -52,6 +55,7 @@ const LoginView: React.FC<ViewProps> = ({
   onSuccessfulValidation,
   isPending,
   isError,
+  navigate,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState<LoginFormState>(initialFormState);
@@ -194,6 +198,28 @@ const LoginView: React.FC<ViewProps> = ({
             >
               Login
             </Button>
+            <Typography
+              sx={{
+                marginTop: "1rem",
+                textAlign: "center",
+                fontSize: "0.9rem",
+                color: "#212121",
+              }}
+            >
+              New user?
+              <span
+                style={{
+                  color: "#1976d2",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+                onClick={() => navigate("/signup")}
+                className="ps-2"
+              >
+                Create your account here
+              </span>
+            </Typography>
           </Box>
         </Card>
       </Box>
