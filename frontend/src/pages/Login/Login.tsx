@@ -44,8 +44,8 @@ type ViewProps = {
 };
 
 const initialFormState: LoginFormState = {
-  emailId: "Sush4@test.com",
-  password: "Sush@123",
+  emailId: "",
+  password: "",
 };
 
 const LoginView: React.FC<ViewProps> = ({
