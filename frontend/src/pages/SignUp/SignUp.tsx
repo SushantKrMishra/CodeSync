@@ -14,30 +14,53 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import { validateEmailId } from "../../domain/utils";
-import { SignUpFormState } from "./hooks";
+import { SignUpFormState, useSignup } from "./hooks";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { invoke, isError, isPending, isSuccess } = useSignup();
 
-  return <SignUpView navigate={navigate} />;
+  const onSignupClick = (payload: SignUpFormState) => {
+    invoke(payload);
+    if (isSuccess) {
+      navigate("/");
+    }
+  };
+
+  return (
+    <SignUpView
+      navigate={navigate}
+      onSignup={onSignupClick}
+      isError={isError}
+      isPending={isPending}
+    />
+  );
 }
 
 type ViewProps = {
   navigate: NavigateFunction;
+  onSignup: (payload: SignUpFormState) => void;
+  isError: boolean;
+  isPending: boolean;
 };
 
 const initialFormState: SignUpFormState = {
   firstName: "Sushant",
   lastName: "Mishra",
-  emailId: "sush4@test.com",
+  emailId: "sush6@test.com",
   password: "Sush@123",
 };
 
-const SignUpView: React.FC<ViewProps> = ({ navigate }) => {
+const SignUpView: React.FC<ViewProps> = ({
+  navigate,
+  onSignup,
+  isError,
+  isPending,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(initialFormState);
   const [errors, setErrors] = useState<Partial<SignUpFormState>>({});
@@ -49,6 +72,10 @@ const SignUpView: React.FC<ViewProps> = ({ navigate }) => {
 
   const onSignupClick = () => {
     const newErrors: Partial<SignUpFormState> = {};
+
+    if (!formState.firstName) {
+      newErrors.firstName = "⚠ Please enter your first name";
+    }
 
     if (!formState.emailId) {
       newErrors.emailId = "⚠ Please enter an email Id!";
@@ -65,13 +92,14 @@ const SignUpView: React.FC<ViewProps> = ({ navigate }) => {
     if (Object.keys(newErrors).length > 0) {
       return;
     }
+    onSignup(formState);
   };
 
-  // useEffect(() => {
-  //   if (isError) {
-  //     setErrorOpen(true);
-  //   }
-  // }, [isError]);
+  useEffect(() => {
+    if (isError) {
+      setErrorOpen(true);
+    }
+  }, [isError]);
 
   return (
     <>
@@ -244,7 +272,7 @@ const SignUpView: React.FC<ViewProps> = ({ navigate }) => {
         </Card>
       </Box>
 
-      <ApplyModal show={false} message="Processing your request..." />
+      <ApplyModal show={isPending} message="Processing your request..." />
 
       {/* Error Snackbar */}
       <Snackbar
