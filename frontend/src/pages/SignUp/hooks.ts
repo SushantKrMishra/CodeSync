@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { signupApi } from "../../data/signup";
+import { signupApi } from "../../data/auth";
 import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
 

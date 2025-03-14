@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { loginApi } from "../../data/login";
+import { loginApi, logoutApi } from "../../data/auth";
 import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
 
@@ -15,6 +15,19 @@ export function useLogin(): MutationHookData<LoginFormState, void> {
     mutationFn: loginApi,
     onSuccess: async () => {
       await client.setQueryData(["sessionStatus"], true);
+    },
+  });
+
+  return deriveMutationState(mutation);
+}
+
+export function useLogout(): MutationHookData<void, void> {
+  const client = useQueryClient();
+  const mutation = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logoutApi,
+    onSuccess: async () => {
+      await client.setQueryData(["sessionStatus"], false);
     },
   });
 

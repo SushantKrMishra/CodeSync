@@ -49,10 +49,10 @@ type ViewProps = {
 };
 
 const initialFormState: SignUpFormState = {
-  firstName: "Sushant",
-  lastName: "Mishra",
-  emailId: "sush6@test.com",
-  password: "Sush@123",
+  firstName: "",
+  lastName: "",
+  emailId: "",
+  password: "",
 };
 
 const SignUpView: React.FC<ViewProps> = ({
