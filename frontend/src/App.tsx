@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import "./App.css";
 import Body from "./components/Body";
 import ErrorIndicator from "./components/ErrorIndicator";
 import Footer from "./components/Footer";

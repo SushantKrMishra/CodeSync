@@ -7,8 +7,8 @@ dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: { type: String, required: true, minLength: 3, maxLength: 20 },
-    lastName: { type: String, default: null, maxLength: 20 },
+    firstName: { type: String, required: true, minLength: 3 },
+    lastName: { type: String, default: null },
     emailId: {
       type: String,
       required: true,

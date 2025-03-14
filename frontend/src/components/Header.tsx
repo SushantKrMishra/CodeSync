@@ -1,8 +1,6 @@
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import SearchIcon from "@mui/icons-material/Search";
 import AppBar from "@mui/material/AppBar";
-import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
@@ -13,6 +11,7 @@ import Toolbar from "@mui/material/Toolbar";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.svg";
+import { useLogout } from "../pages/Login/hooks";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -58,6 +57,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const Header: React.FC<{ isAuthenticated: boolean }> = ({
   isAuthenticated,
 }) => {
+  const { invoke } = useLogout();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -69,6 +69,16 @@ const Header: React.FC<{ isAuthenticated: boolean }> = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+    handleMenuClose();
+  };
+
+  const handleLogoutClick = () => {
+    handleMenuClose();
+    invoke();
   };
 
   const menuId = "primary-search-account-menu";
@@ -88,8 +98,8 @@ const Header: React.FC<{ isAuthenticated: boolean }> = ({
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+      <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
     </Menu>
   );
 
@@ -125,15 +135,6 @@ const Header: React.FC<{ isAuthenticated: boolean }> = ({
               </Box>
               <Box sx={{ flexGrow: 1 }} />
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                <IconButton
-                  size="large"
-                  aria-label="show 17 new notifications"
-                  color="inherit"
-                >
-                  <Badge badgeContent={17} color="error">
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
                 <IconButton
                   size="large"
                   edge="end"

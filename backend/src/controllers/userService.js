@@ -44,7 +44,14 @@ export const getUser = async (req, res) => {
 
 export const getUserProfile = (req, res) => {
   const user = req.user;
-  res.status(200).json({ user });
+  res.status(200).json({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    age: user.age,
+    gender: user.gender,
+    userName: user.userName,
+    about: user.about,
+  });
 };
 
 export const updateUserProfile = async (req, res) => {
