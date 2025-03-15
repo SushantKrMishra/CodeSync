@@ -6,12 +6,13 @@ import {
   getMyPosts,
   updatePost,
 } from "../controllers/feedService.js";
+import { validateObjectId } from "../middlewares/userService.js";
 const router = express.Router();
 
 router.post("/create", createPost);
 router.get("/myPosts", getMyPosts);
-router.delete("/:id", deletePost);
-router.patch("/:id", updatePost);
+router.delete("/:id", validateObjectId, deletePost);
+router.patch("/:id", validateObjectId, updatePost);
 
 router.get("/", feeds);
 

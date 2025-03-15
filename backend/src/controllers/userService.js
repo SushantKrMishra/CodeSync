@@ -1,5 +1,6 @@
 import validator from "validator";
 import { ConnectionRequest } from "../models/connectionRequest.js";
+import { Post } from "../models/posts.js";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateProfileUpdateData } from "../utils/validation.js";
@@ -27,12 +28,27 @@ export const getUser = async (req, res) => {
         message: "User not found",
       });
     }
+
+    const posts = await Post.find({ postedBy: id }, "-postedBy -__v -createdAt")
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    const connection = await ConnectionRequest.findOne({
+      $or: [
+        { senderId: req.user._id, recieverId: id },
+        { senderId: id, recieverId: req.user._id },
+      ],
+    }).lean();
+
     res.status(200).json({
       firstName: user.firstName,
       lastName: user.lastName,
       age: user.age,
       gender: user.gender,
       userName: user.userName,
+      about: user.about,
+      posts,
+      connectionStatus: connection ? connection.status : "none",
     });
   } catch (err) {
     //TODO: Logger Here why it failed

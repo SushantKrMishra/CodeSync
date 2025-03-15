@@ -6,6 +6,7 @@ interface FeedUserInfo {
   firstName: string;
   lastName: string;
   userName: string;
+  _id: string;
 }
 
 export interface FeedPost {

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createPost } from "../../data/createPost";
+import { createPost } from "../../data/posts";
 import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
 import { Post } from "../Profile/hooks";

@@ -5,6 +5,7 @@ import Login from "../pages/Login/Login";
 import { EditProfilePage } from "../pages/Profile/EditProfile";
 import MyProfile from "../pages/Profile/Profile";
 import SignUp from "../pages/SignUp/SignUp";
+import UserDetails from "../pages/UserDetails/UserDetails";
 import ProtectedRoute from "./Protected";
 
 const Body: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
@@ -27,6 +28,7 @@ const Body: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
         <Route path="/create-post" element={<AddPostPage />} />
+        <Route path="/user-profile/:id" element={<UserDetails />} />
         <Route path="*" element={<>Hello World! 😠</>} />
       </Route>
     </Routes>
