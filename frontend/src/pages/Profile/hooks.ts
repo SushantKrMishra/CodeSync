@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deletePost,
   getUserPosts,
   getUserProfile,
   updateUserProfile,
@@ -23,11 +24,6 @@ export interface Post {
   imageUrl?: string;
 }
 
-export interface MyProfilePageInfo {
-  user: UserProfile;
-  posts: Post[];
-}
-
 export function useUserProfile(): QueryHookData<UserProfile> {
   const query = useQuery({
     queryKey: ["userProfile"],
@@ -44,20 +40,6 @@ export function useUserPosts(): QueryHookData<Post[]> {
   return deriveQueryState(query);
 }
 
-export function useUserProfilePageInfo(): QueryHookData<MyProfilePageInfo> {
-  const userInfo = useUserProfile();
-  const userPosts = useUserPosts();
-  const query = useQuery({
-    queryKey: ["userProfilePageInfo"],
-    queryFn: async () => ({
-      user: userInfo.data!,
-      posts: userPosts.data!,
-    }),
-    enabled: userInfo.data !== undefined && userPosts.data !== undefined,
-  });
-  return deriveQueryState(query, [userInfo, userPosts]);
-}
-
 export function useUpdateUserProfileInfo(): MutationHookData<
   Partial<UserProfile>,
   void | string
@@ -70,6 +52,18 @@ export function useUpdateUserProfileInfo(): MutationHookData<
       await client.invalidateQueries({
         queryKey: ["userProfile"],
       });
+    },
+  });
+  return deriveMutationState(mut);
+}
+
+export function useDeletePost(): MutationHookData<string, void> {
+  const client = useQueryClient();
+  const mut = useMutation({
+    mutationKey: ["deletePost"],
+    mutationFn: deletePost,
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["userPosts"] });
     },
   });
   return deriveMutationState(mut);

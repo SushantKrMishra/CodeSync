@@ -51,3 +51,11 @@ export async function updateUserProfile(
     mapAndThrowError(err);
   }
 }
+
+export async function deletePost(id: string): Promise<void> {
+  try {
+    await apiClient.delete("/feed/" + id);
+  } catch (errr) {
+    mapAndThrowError(errr);
+  }
+}

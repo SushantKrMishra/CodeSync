@@ -1,67 +1,28 @@
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import SearchIcon from "@mui/icons-material/Search";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import { alpha, styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
+import { motion } from "framer-motion";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.svg";
 import { useLogout } from "../pages/Login/hooks";
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  maxWidth: "500px",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "50ch",
-    },
-  },
-}));
 
 const Header: React.FC<{ isAuthenticated: boolean }> = ({
   isAuthenticated,
 }) => {
   const { invoke } = useLogout();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
   const isMenuOpen = Boolean(anchorEl);
   const navigate = useNavigate();
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -85,18 +46,30 @@ const Header: React.FC<{ isAuthenticated: boolean }> = ({
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
       open={isMenuOpen}
       onClose={handleMenuClose}
+      PaperProps={{
+        elevation: 4,
+        sx: {
+          borderRadius: "12px",
+          overflow: "visible",
+          mt: 1.5,
+          "&:before": {
+            content: '""',
+            display: "block",
+            position: "absolute",
+            top: 0,
+            right: 14,
+            width: 10,
+            height: 10,
+            bgcolor: "background.paper",
+            transform: "translateY(-50%) rotate(45deg)",
+            zIndex: 0,
+          },
+        },
+      }}
     >
       <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
       <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
@@ -105,50 +78,62 @@ const Header: React.FC<{ isAuthenticated: boolean }> = ({
 
   return (
     <Box>
-      <AppBar position="static" sx={{ backgroundColor: "#212121" }}>
-        <Toolbar>
-          <Box
-            sx={{
-              display: "flex",
-              marginBottom: "10px",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate("/")}
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: "#212121",
+          boxShadow: "none",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.12)",
+        }}
+      >
+        <Toolbar sx={{ minHeight: "64px!important" }}>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={headerVariants}
+            transition={{ duration: 0.5 }}
+            className="flex items-center w-full"
           >
-            <Logo />
-          </Box>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              <Logo />
+            </motion.div>
 
-          {isAuthenticated && (
-            <>
-              <Box
-                sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
+            {isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="ml-auto"
               >
-                <Search>
-                  <SearchIconWrapper>
-                    <SearchIcon />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                    placeholder="Search…"
-                    inputProps={{ "aria-label": "search" }}
-                  />
-                </Search>
-              </Box>
-              <Box sx={{ flexGrow: 1 }} />
-              <Box sx={{ display: { xs: "none", md: "flex" } }}>
                 <IconButton
                   size="large"
                   edge="end"
-                  aria-label="account of current user"
+                  aria-label="account"
                   aria-controls={menuId}
                   aria-haspopup="true"
                   onClick={handleProfileMenuOpen}
                   color="inherit"
+                  sx={{
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                    },
+                  }}
                 >
-                  <AccountCircle />
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <AccountCircle fontSize="large" />
+                  </motion.div>
                 </IconButton>
-              </Box>
-            </>
-          )}
+              </motion.div>
+            )}
+          </motion.div>
         </Toolbar>
       </AppBar>
       {renderMenu}
