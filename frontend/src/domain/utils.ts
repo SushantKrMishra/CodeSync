@@ -63,3 +63,12 @@ function deepEqual(a: unknown, b: unknown): boolean {
 
   return false;
 }
+
+export const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};

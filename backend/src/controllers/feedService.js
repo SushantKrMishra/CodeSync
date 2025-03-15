@@ -26,17 +26,14 @@ export const feeds = async (req, res) => {
 
 export const getMyPosts = async (req, res) => {
   try {
-    const data = await Post.find({ postedBy: req.user._id }).select(
-      "-postedBy -createdAt -__v"
-    );
-    res.status(200).json({
-      data,
-    });
+    const data = await Post.find({ postedBy: req.user._id }, "-postedBy -__v")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({ data });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    // TODO: Add proper logging for errors
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 

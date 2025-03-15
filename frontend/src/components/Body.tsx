@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AddPostPage } from "../pages/AddPost/AddPost";
 import { Home } from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import { EditProfilePage } from "../pages/Profile/EditProfile";
@@ -25,6 +26,7 @@ const Body: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
         <Route index element={<Home />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
+        <Route path="/create-post" element={<AddPostPage />} />
         <Route path="*" element={<>Hello World! 😠</>} />
       </Route>
     </Routes>

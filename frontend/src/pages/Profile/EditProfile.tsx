@@ -137,7 +137,7 @@ const EditProfilePageView = ({
 
   return (
     <>
-      <div className="min-h-screen p-4 flex items-center justify-center bg-[#d8dada]">
+      <div className="p-4 flex items-center justify-center bg-[#d8dada]">
         <motion.div
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
