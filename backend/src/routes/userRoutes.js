@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getConnections,
   getRecievedConnectionRequest,
   getSendConnectionRequest,
   getUser,
@@ -7,8 +8,9 @@ import {
   getUsers,
   updateUserName,
   updateUserPasscode,
-  updateUserProfile,getConnections
+  updateUserProfile,
 } from "../controllers/userService.js";
+import { validateObjectId } from "../middlewares/userService.js";
 
 const router = express.Router();
 
@@ -22,6 +24,6 @@ router.get("/connectionRequest/send", getSendConnectionRequest);
 router.get("/connections", getConnections);
 
 // TODO: Forgot password
-router.get("/user/:id", getUser);
+router.get("/user/:id", validateObjectId, getUser);
 
 export default router;

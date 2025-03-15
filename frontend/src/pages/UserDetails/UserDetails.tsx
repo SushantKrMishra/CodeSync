@@ -13,14 +13,53 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FeedPost } from "../pages/Home/hooks";
+import { useParams } from "react-router-dom";
+import ErrorIndicator from "../../components/ErrorIndicator";
+import LoadingIndicator from "../../components/LoadingIndicator";
+import { UserNotFound } from "../../components/UserNotFound";
+import { UserProfileCard } from "../../components/UserProfileCard";
+import { Post, UserProfile } from "../Profile/hooks";
+import { ConnectionStatus, useUserDetails } from "./hooks";
 
-export function FeedPosts({ posts }: { posts: FeedPost[] }) {
-  const navigate = useNavigate();
-  const onUserClick = (userId: string) => {
-    navigate("/user-profile/" + userId);
-  };
+const UserDetails = () => {
+  const params = useParams();
+  const { id } = params;
+  const { data, isError, isFetching } = useUserDetails(id);
+
+  if (isError) {
+    return <ErrorIndicator />;
+  }
+
+  if (isFetching || data === undefined) {
+    return <LoadingIndicator />;
+  }
+
+  if (data === "not-found") {
+    return <UserNotFound />;
+  }
+
+  return (
+    <UserDetailsView
+      posts={data.posts}
+      user={data.user}
+      connectionStatus={data.connectionStatus}
+    />
+  );
+};
+
+export default UserDetails;
+
+type Props = {
+  posts: Post[];
+  user: UserProfile;
+  connectionStatus: ConnectionStatus;
+};
+
+const UserDetailsView: React.FC<Props> = ({
+  posts,
+  user,
+  connectionStatus,
+}) => {
   return (
     <Box
       sx={{
@@ -35,21 +74,25 @@ export function FeedPosts({ posts }: { posts: FeedPost[] }) {
         mx: "auto",
       }}
     >
+      <UserProfileCard
+        user={user}
+        connectionStatus={connectionStatus}
+        followersCount={0}
+        onConnectionAction={() => {}}
+      />
       {posts.map((post) => (
-        <PostCard key={post._id} post={post} onUserClick={onUserClick} />
+        <PostCard key={post._id} post={post} />
       ))}
     </Box>
   );
-}
+};
 
 const PostCard = ({
   post,
   onLike,
-  onUserClick,
 }: {
-  post: FeedPost;
+  post: Post;
   onLike?: (postId: string) => void;
-  onUserClick: (userId: string) => void;
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -83,19 +126,6 @@ const PostCard = ({
         )}
 
         <CardContent className="!px-4 !py-3">
-          <div className="flex items-center gap-2 mb-2 ">
-            <Typography
-              variant="subtitle2"
-              className="!font-medium cursor-pointer"
-              onClick={() => onUserClick(post.postedBy._id)}
-            >
-              {post.postedBy.firstName} {post.postedBy.lastName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary cursor-pointer">
-              @{post.postedBy.userName}
-            </Typography>
-          </div>
-
           <Typography variant="body1" className="!text-[15px] !leading-snug">
             {post.content}
           </Typography>

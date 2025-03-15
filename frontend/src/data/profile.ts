@@ -1,7 +1,9 @@
 import { AxiosError } from "axios";
 import { mapAndThrowError } from "../domain/utils";
-import { Post, UserProfile } from "../pages/Profile/hooks";
+import { UserProfile } from "../pages/Profile/hooks";
+import { UserDetailsInfo } from "../pages/UserDetails/hooks";
 import { apiClient } from "./apiClient";
+import { convertStringToConnectionStatus } from "./mappings";
 
 export async function getUserProfile(): Promise<UserProfile> {
   try {
@@ -14,15 +16,6 @@ export async function getUserProfile(): Promise<UserProfile> {
       userName: response.data?.userName,
       about: response.data?.about,
     };
-  } catch (err) {
-    mapAndThrowError(err);
-  }
-}
-
-export async function getUserPosts(): Promise<Post[]> {
-  try {
-    const response = await apiClient.get("/feed/myPosts");
-    return response.data.data;
   } catch (err) {
     mapAndThrowError(err);
   }
@@ -52,10 +45,29 @@ export async function updateUserProfile(
   }
 }
 
-export async function deletePost(id: string): Promise<void> {
+export async function getUserDetails(
+  id: string
+): Promise<UserDetailsInfo | "not-found"> {
   try {
-    await apiClient.delete("/feed/" + id);
-  } catch (errr) {
-    mapAndThrowError(errr);
+    const response = await apiClient.get("api/user/" + id);
+    return {
+      user: {
+        userName: response.data.userName,
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+        age: response.data.age,
+        gender: response.data.gender,
+        about: response.data.about,
+      },
+      connectionStatus: convertStringToConnectionStatus(
+        response.data.connectionStatus
+      ),
+      posts: response.data.posts,
+    };
+  } catch (err) {
+    if (err instanceof AxiosError && err.status === 400) {
+      return "not-found";
+    }
+    mapAndThrowError(err);
   }
 }
