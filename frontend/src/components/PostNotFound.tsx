@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-export const UserNotFound = () => {
+export const PostNotFound = () => {
   const navigate = useNavigate();
 
   return (
@@ -48,7 +48,7 @@ export const UserNotFound = () => {
             mb: 2,
           }}
         >
-          User Not Found
+          Post Not Found
         </Typography>
       </motion.div>
 
@@ -66,8 +66,8 @@ export const UserNotFound = () => {
             mb: 4,
           }}
         >
-          Oops! It seems the user you're looking for doesn't exist or may have
-          been removed.
+          Oops! It seems the Post you're looking for doesn't exist or may have
+          been deleted.
         </Typography>
       </motion.div>
 

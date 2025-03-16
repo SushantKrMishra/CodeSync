@@ -1,6 +1,7 @@
 import {
   AlternateEmail,
   Cake,
+  Close,
   Info,
   Person,
   Save,
@@ -17,7 +18,7 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import ErrorIndicator from "../../components/ErrorIndicator";
 import LoadingIndicator from "../../components/LoadingIndicator";
@@ -64,6 +65,7 @@ export const EditProfilePage = () => {
       isUpdating={isUpdatePending}
       error={updateData}
       isError={isUpdateError}
+      navigate={navigate}
     />
   );
 };
@@ -74,12 +76,14 @@ const EditProfilePageView = ({
   isUpdating,
   error,
   isError,
+  navigate,
 }: {
   user: UserProfile;
   onSave: (updatedUser: UserProfile) => void;
   isUpdating: boolean;
   error?: string | void;
   isError: boolean;
+  navigate: NavigateFunction;
 }) => {
   const [formState, setFormState] = useState<UserProfile>(user);
   const [errorOpen, setErrorOpen] = useState(false);
@@ -155,7 +159,6 @@ const EditProfilePageView = ({
             animate={{ scale: 1 }}
             className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-600"
           />
-
           <Typography
             variant="h4"
             fontWeight={700}
@@ -173,7 +176,6 @@ const EditProfilePageView = ({
               className="h-1 bg-gradient-to-r from-blue-500 to-purple-600 w-24 mx-auto mt-2"
             />
           </Typography>
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -270,8 +272,8 @@ const EditProfilePageView = ({
                       },
                     }}
                     error={!!error}
-                    helperText={error} // Changed from helperText={!!error}
-                    inputProps={inputProps} // Also fix this line from slotProps
+                    helperText={error} 
+                    inputProps={inputProps} 
                   >
                     {select &&
                       options?.map((option) => (
@@ -323,8 +325,40 @@ const EditProfilePageView = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="mt-8 flex justify-center"
+            className="mt-8 flex justify-center gap-4"
           >
+            <Button
+              variant="outlined"
+              onClick={() => navigate(-1)} 
+              sx={{
+                border: "2px solid #ef4444",
+                borderRadius: "14px",
+                px: 6,
+                py: 1.5,
+                textTransform: "none",
+                fontSize: "1rem",
+                color: "#ef4444",
+                "&:hover": {
+                  border: "2px solid #dc2626",
+                  backgroundColor: "rgba(239, 68, 68, 0.08)",
+                  color: "#dc2626",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 14px rgba(239, 68, 68, 0.15)",
+                  transition: "all 0.3s ease",
+                },
+              }}
+              className="group"
+            >
+              <motion.span
+                initial={{ x: -5, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="flex items-center gap-2"
+              >
+                <Close className="group-hover:rotate-180 transition-transform" />
+                Cancel
+              </motion.span>
+            </Button>
+
             <Button
               variant="contained"
               onClick={handleSubmit}
