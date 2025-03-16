@@ -15,6 +15,7 @@ export const UserProfileCard = ({
   onConnectionAction: () => void;
 }) => {
   const getButtonConfig = () => {
+    // TODO: Think of Remove connection
     switch (connectionStatus) {
       case ConnectionStatus.None:
         return { text: "Follow", variant: "contained", disabled: false };
@@ -24,8 +25,6 @@ export const UserProfileCard = ({
         return { text: "Following", variant: "outlined", disabled: true };
       case ConnectionStatus.Rejected:
         return { text: "Follow", variant: "contained", disabled: true };
-      default:
-        return { text: "Follow", variant: "contained", disabled: false };
     }
   };
 

@@ -34,7 +34,7 @@ const UserDetails = () => {
     return <LoadingIndicator />;
   }
 
-  if (data === "not-found") {
+  if (data === "not-found" || id === undefined || id.trim() === "") {
     return <UserNotFound />;
   }
 

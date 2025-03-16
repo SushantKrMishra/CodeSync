@@ -4,9 +4,9 @@ import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
 import { Post } from "../Profile/hooks";
 
-export type CreatePostFormState = Pick<Post, "content" | "imageUrl">;
+export type PostFormState = Pick<Post, "content" | "imageUrl">;
 
-export function useCreatePost(): MutationHookData<CreatePostFormState, void> {
+export function useCreatePost(): MutationHookData<PostFormState, void> {
   const client = useQueryClient();
   const mut = useMutation({
     mutationKey: ["createPost"],

@@ -72,7 +72,7 @@ function MyProfilePage({
       <UserPosts
         posts={posts}
         onDeleteClick={onDeleteClick}
-        onEditClick={() => {}}
+        onEditClick={(id) => navigate("/edit-post/" + id)}
         isDeleting={isDeleting}
       />
     </div>

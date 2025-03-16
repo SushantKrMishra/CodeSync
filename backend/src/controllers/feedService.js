@@ -133,3 +133,38 @@ export const updatePost = async (req, res) => {
     });
   }
 };
+
+export const getPost = async (req, res) => {
+  try {
+    const { id: postId } = req.params;
+    if (!postId) {
+      return res.status(400).json({
+        message: "Bad request",
+      });
+    }
+
+    const post = await Post.findById(postId)
+      .select("-__v -createdAt")
+      .populate("postedBy", "firstName lastName userName");
+    if (!post) {
+      return res.status(204).json({
+        message: "No post found",
+      });
+    }
+
+    const isEditingAllowed = req.user._id.equals(post.postedBy._id);
+    res.status(200).json({
+      isEditingAllowed,
+      _id: post._id,
+      imageUrl: post.imageUrl,
+      postedBy: post.postedBy,
+      content: post.content,
+      updatedAt: post.updatedAt,
+    });
+  } catch (err) {
+    //TODO: Logger Here why it failed
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
