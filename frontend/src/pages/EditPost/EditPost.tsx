@@ -5,9 +5,8 @@ import {
   Save,
 } from "@mui/icons-material";
 import { Button, InputAdornment, TextField, Typography } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import { EditNotAllowed } from "../../components/EditNotAllowed";
@@ -22,20 +21,12 @@ import { usePost, useUpdatePost } from "./hooks";
 const EditPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data, isError, isPending } = usePost(id);
+  const { data, isError, isFetching } = usePost(id);
   const {
     invoke,
     isError: isUpdateError,
     isPending: isSubmiting,
   } = useUpdatePost();
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    return () => {
-      queryClient.removeQueries({ queryKey: ["postInfo"] });
-    };
-    //eslint-disable-next-line
-  }, []);
 
   const onCancelClick = () => {
     navigate(-1);
@@ -53,7 +44,7 @@ const EditPost = () => {
     return <ErrorIndicator />;
   }
 
-  if (isPending || data === undefined) {
+  if (isFetching || data === undefined) {
     return <LoadingIndicator />;
   }
 
