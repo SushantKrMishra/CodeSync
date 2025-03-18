@@ -19,8 +19,8 @@ export const sendConnectionRequest = async (req, res) => {
 
     const existingRequest = await ConnectionRequest.findOne({
       $or: [
-        { senderId: req.user._id, recieverId: id },
-        { senderId: id, recieverId: req.user._id },
+        { senderId: req.user._id, recieverId: requestedUser._id },
+        { senderId: requestedUser._id, recieverId: req.user._id },
       ],
     });
 
@@ -32,7 +32,7 @@ export const sendConnectionRequest = async (req, res) => {
 
     const connectionRequest = new ConnectionRequest({
       senderId: req.user._id,
-      recieverId: id,
+      recieverId: requestedUser._id,
       status: "pending",
     });
     await connectionRequest.save();
@@ -55,9 +55,15 @@ export const withdrawConnectionRequest = async (req, res) => {
         message: "Bad request",
       });
     }
+    const requestedUser = await User.findById(id);
+    if (!requestedUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
     const deletedRequest = await ConnectionRequest.findOneAndDelete({
       senderId: req.user._id,
-      recieverId: id,
+      recieverId: requestedUser._id,
       status: "pending",
     });
 
@@ -84,40 +90,37 @@ export const handleConnectionRequest = async (req, res) => {
     const { id, status } = req.params;
 
     if (!status || !id) {
-      return res.status(400).json({
-        message: "Bad request",
-      });
+      return res.status(400).json({ message: "Bad request" });
     }
 
     const allowedStatus = ["accepted", "rejected"];
     if (!allowedStatus.includes(status)) {
-      return res.status(400).json({
-        message: "Bad request",
-      });
+      return res.status(400).json({ message: "Bad request" });
+    }
+
+    const requestedUser = await User.findById(id);
+    if (!requestedUser) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     const connectionRequest = await ConnectionRequest.findOne({
-      _id: id,
+      senderId: id,
       recieverId: loggedInUser._id,
       status: "pending",
     });
 
     if (!connectionRequest) {
-      return res.status(404).json({
-        message: "No Connection Request",
-      });
+      return res.status(404).json({ message: "No Connection Request" });
     }
 
     connectionRequest.status = status;
     await connectionRequest.save();
-    res.status(200).json({
-      message: `Successfully ${status} connection request`,
-    });
+
+    res
+      .status(200)
+      .json({ message: `Successfully ${status} connection request` });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -148,6 +151,7 @@ export const connectionSuggestion = async (req, res) => {
           userName: 1,
           firstName: 1,
           lastName: 1,
+          about: 1,
         },
       },
     ]);

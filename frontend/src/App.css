@@ -13,4 +13,5 @@ body {
   padding: 0;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
+  user-select: none;
 }

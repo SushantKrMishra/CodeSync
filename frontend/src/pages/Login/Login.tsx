@@ -127,6 +127,11 @@ const LoginView: React.FC<ViewProps> = ({
                   "&.Mui-focused": { color: "#212121" },
                 },
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onLoginClick();
+                }
+              }}
             />
             {errors?.emailId && (
               <div className="mt-2 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-md border border-red-300 shadow-sm">
@@ -170,6 +175,11 @@ const LoginView: React.FC<ViewProps> = ({
                     borderBottom: "1px solid #212121",
                   },
                   "&.Mui-focused:before": { borderBottom: "2px solid #212121" },
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onLoginClick();
+                  }
                 }}
               />
               {errors?.password && (
@@ -226,7 +236,6 @@ const LoginView: React.FC<ViewProps> = ({
 
       <ApplyModal show={isPending} message="Processing your request..." />
 
-      {/* Error Snackbar */}
       <Snackbar
         open={errorOpen}
         autoHideDuration={4000}
