@@ -22,7 +22,7 @@ import { SignUpFormState, useSignup } from "./hooks";
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { invoke, isError, isPending, isSuccess } = useSignup();
+  const { invoke, data, isError, isPending, isSuccess } = useSignup();
 
   const onSignupClick = (payload: SignUpFormState) => {
     invoke(payload);
@@ -37,6 +37,7 @@ export default function SignUp() {
       onSignup={onSignupClick}
       isError={isError}
       isPending={isPending}
+      isEmailError={data === "not-allowed"}
     />
   );
 }
@@ -46,6 +47,7 @@ type ViewProps = {
   onSignup: (payload: SignUpFormState) => void;
   isError: boolean;
   isPending: boolean;
+  isEmailError: boolean;
 };
 
 const initialFormState: SignUpFormState = {
@@ -60,6 +62,7 @@ const SignUpView: React.FC<ViewProps> = ({
   onSignup,
   isError,
   isPending,
+  isEmailError,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(initialFormState);
@@ -134,6 +137,11 @@ const SignUpView: React.FC<ViewProps> = ({
                     "&.Mui-focused": { color: "#212121" },
                   },
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSignupClick();
+                  }
+                }}
               />
               {errors?.firstName && (
                 <div className="mt-2 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-md border border-red-300 shadow-sm">
@@ -155,6 +163,11 @@ const SignUpView: React.FC<ViewProps> = ({
                     "&.Mui-focused": { color: "#212121" },
                   },
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSignupClick();
+                  }
+                }}
               />
               {errors?.lastName && (
                 <div className="mt-2 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-md border border-red-300 shadow-sm">
@@ -175,10 +188,20 @@ const SignUpView: React.FC<ViewProps> = ({
                   "&.Mui-focused": { color: "#212121" },
                 },
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onSignupClick();
+                }
+              }}
             />
             {errors?.emailId && (
               <div className="mt-2 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-md border border-red-300 shadow-sm">
                 {errors.emailId}
+              </div>
+            )}
+            {isEmailError && (
+              <div className="mt-2 bg-red-100 text-red-700 px-3 py-2 text-sm rounded-md border border-red-300 shadow-sm">
+                This email ID is already registered. Please log in to continue.
               </div>
             )}
 
@@ -218,6 +241,11 @@ const SignUpView: React.FC<ViewProps> = ({
                     borderBottom: "1px solid #212121",
                   },
                   "&.Mui-focused:before": { borderBottom: "2px solid #212121" },
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSignupClick();
+                  }
                 }}
               />
               {errors?.password && (

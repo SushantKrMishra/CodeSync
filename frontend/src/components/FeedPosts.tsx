@@ -36,7 +36,12 @@ export function FeedPosts({ posts }: { posts: FeedPost[] }) {
       }}
     >
       {posts.map((post) => (
-        <PostCard key={post._id} post={post} onUserClick={onUserClick} />
+        <PostCard
+          key={post._id}
+          post={post}
+          onUserClick={onUserClick}
+          onPostClick={() => navigate("/view-post/" + post._id)}
+        />
       ))}
     </Box>
   );
@@ -46,16 +51,19 @@ const PostCard = ({
   post,
   onLike,
   onUserClick,
+  onPostClick,
 }: {
   post: FeedPost;
   onLike?: (postId: string) => void;
   onUserClick: (userId: string) => void;
+  onPostClick: () => void;
 }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
-  const handleLike = () => {
+  const handleLike = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
     // TODO: To be implemented
+    e.stopPropagation();
     setIsLiked(!isLiked);
     setLikeCount((prev) => prev + (isLiked ? -1 : 1));
     onLike?.(post._id);
@@ -67,7 +75,8 @@ const PostCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       whileHover={{ y: -4 }}
-      className="mb-6 bg-white rounded-xl shadow-md overflow-hidden relative"
+      className="mb-6 bg-white rounded-xl shadow-md overflow-hidden relative cursor-pointer"
+      onClick={onPostClick}
     >
       <Card className="!rounded-xl !bg-transparent !shadow-none">
         {post.imageUrl && (
@@ -87,7 +96,10 @@ const PostCard = ({
             <Typography
               variant="subtitle2"
               className="!font-medium cursor-pointer"
-              onClick={() => onUserClick(post.postedBy._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onUserClick(post.postedBy._id);
+              }}
             >
               {post.postedBy.firstName} {post.postedBy.lastName}
             </Typography>

@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getConnections,
-  getRecievedConnectionRequest,
+  getReceivedConnectionRequests,
   getSendConnectionRequest,
   getUser,
   getUserProfile,
@@ -19,7 +19,7 @@ router.get("/profile", getUserProfile);
 router.patch("/profile", updateUserProfile);
 router.patch("/profile/username", updateUserName);
 router.patch("/profile/passcode", updateUserPasscode);
-router.get("/connectionRequest/recieved", getRecievedConnectionRequest);
+router.get("/connectionRequest/recieved", getReceivedConnectionRequests);
 router.get("/connectionRequest/send", getSendConnectionRequest);
 router.get("/connections", getConnections);
 

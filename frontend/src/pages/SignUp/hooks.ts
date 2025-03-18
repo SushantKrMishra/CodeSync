@@ -10,7 +10,10 @@ export type SignUpFormState = {
   password: string;
 };
 
-export function useSignup(): MutationHookData<SignUpFormState, void> {
+export function useSignup(): MutationHookData<
+  SignUpFormState,
+  "not-allowed" | void
+> {
   const mutation = useMutation({
     mutationKey: ["signup"],
     mutationFn: signupApi,

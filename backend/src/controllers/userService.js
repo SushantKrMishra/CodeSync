@@ -35,10 +35,10 @@ export const getUser = async (req, res) => {
 
     const connection = await ConnectionRequest.findOne({
       $or: [
-        { senderId: req.user._id, recieverId: id },
-        { senderId: id, recieverId: req.user._id },
+        { senderId: req.user._id, recieverId: user._id },
+        { senderId: user._id, recieverId: req.user._id },
       ],
-    }).lean();
+    });
 
     res.status(200).json({
       firstName: user.firstName,
@@ -183,22 +183,19 @@ export const updateUserPasscode = async (req, res, next) => {
   }
 };
 
-export const getRecievedConnectionRequest = async (req, res) => {
+export const getReceivedConnectionRequests = async (req, res) => {
   try {
     const loggedInUser = req.user;
     const connectionRequests = await ConnectionRequest.find({
       recieverId: loggedInUser._id,
       status: "pending",
-    }).populate(["recieverId"], ["firstName", "lastName", "userName"]);
-    const data = connectionRequests.map((e) => e.recieverId);
-    res.status(200).json({
-      data,
-    });
+    }).populate("senderId", "firstName lastName userName about _id");
+
+    const data = connectionRequests.map((e) => e.senderId);
+
+    res.status(200).json({ data });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -208,7 +205,10 @@ export const getSendConnectionRequest = async (req, res) => {
     const connectionRequests = await ConnectionRequest.find({
       senderId: loggedInUser._id,
       status: "pending",
-    }).populate(["recieverId"], ["firstName", "lastName", "userName"]);
+    }).populate(
+      ["recieverId"],
+      ["firstName", "lastName", "userName", "about", "_id"]
+    );
     const data = connectionRequests.map((e) => e.recieverId);
     res.status(200).json({
       data,

@@ -16,6 +16,16 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid request payload" });
     }
 
+    const isUserAlreadyPresent = await User.findOne({
+      emailId: payload.emailId,
+    });
+
+    if (isUserAlreadyPresent) {
+      return res.status(406).json({
+        message: "Not allowed",
+      });
+    }
+
     const user = new User({
       firstName: payload.firstName,
       lastName: payload.lastName,
