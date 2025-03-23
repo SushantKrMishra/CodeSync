@@ -1,7 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { getSessionStatus } from "../data/misc";
-import { QueryHookData } from "./hook_data";
-import { deriveQueryState } from "./hook_impl";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getSessionStatus, likeHandler } from "../data/misc";
+import { MutationHookData, QueryHookData } from "./hook_data";
+import { deriveMutationState, deriveQueryState } from "./hook_impl";
 
 export function useSessionStatus(): QueryHookData<boolean> {
   const query = useQuery({
@@ -10,4 +10,12 @@ export function useSessionStatus(): QueryHookData<boolean> {
     staleTime: Infinity,
   });
   return deriveQueryState(query);
+}
+
+export function useLikeHook(): MutationHookData<string, void> {
+  const mut = useMutation({
+    mutationKey: ["likeHandler"],
+    mutationFn: likeHandler,
+  });
+  return deriveMutationState(mut);
 }

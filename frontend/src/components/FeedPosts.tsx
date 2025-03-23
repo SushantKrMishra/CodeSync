@@ -14,9 +14,11 @@ import {
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLikeHook } from "../domain/misc_hooks";
 import { FeedPost } from "../pages/Home/hooks";
 
 export function FeedPosts({ posts }: { posts: FeedPost[] }) {
+  const { invoke: likeHandler } = useLikeHook();
   const navigate = useNavigate();
   const onUserClick = (userId: string) => {
     navigate("/user-profile/" + userId);
@@ -41,6 +43,7 @@ export function FeedPosts({ posts }: { posts: FeedPost[] }) {
           post={post}
           onUserClick={onUserClick}
           onPostClick={() => navigate("/view-post/" + post._id)}
+          onLike={() => likeHandler(post._id)}
         />
       ))}
     </Box>
@@ -54,19 +57,18 @@ const PostCard = ({
   onPostClick,
 }: {
   post: FeedPost;
-  onLike?: (postId: string) => void;
+  onLike: () => void;
   onUserClick: (userId: string) => void;
   onPostClick: () => void;
 }) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [likeCount, setLikeCount] = useState(post.likedCount);
 
   const handleLike = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-    // TODO: To be implemented
     e.stopPropagation();
     setIsLiked(!isLiked);
     setLikeCount((prev) => prev + (isLiked ? -1 : 1));
-    onLike?.(post._id);
+    onLike();
   };
 
   return (

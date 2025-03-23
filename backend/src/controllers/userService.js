@@ -19,24 +19,65 @@ export const getUsers = async (req, res) => {
   }
 };
 
+import mongoose from "mongoose";
+
 export const getUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user._id;
 
-    const user = await User.findById(id);
+    // Fetch user details
+    const user = await User.findById(id).select(
+      "firstName lastName age gender userName about"
+    );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const posts = await Post.find({ postedBy: id }, "-postedBy -__v -createdAt")
-      .sort({ updatedAt: -1 })
-      .lean();
+    const posts = await Post.aggregate([
+      { $match: { postedBy: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "likes",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            {
+              $group: {
+                _id: null,
+                likedCount: { $sum: 1 },
+                users: { $push: "$userId" },
+              },
+            },
+          ],
+          as: "likesData",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          imageUrl: 1,
+          content: 1,
+          updatedAt: 1,
+          likedCount: {
+            $ifNull: [{ $arrayElemAt: ["$likesData.likedCount", 0] }, 0],
+          },
+          isLiked: {
+            $in: [
+              userId,
+              { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
+            ],
+          },
+        },
+      },
+      { $sort: { updatedAt: -1 } },
+    ]);
 
     // Get connection status between logged-in user and requested user
     const connection = await ConnectionRequest.findOne({
       $or: [
-        { senderId: req.user._id, recieverId: user._id },
-        { senderId: user._id, recieverId: req.user._id },
+        { senderId: userId, recieverId: user._id },
+        { senderId: user._id, recieverId: userId },
       ],
     });
 
@@ -44,10 +85,7 @@ export const getUser = async (req, res) => {
     const followerCount = await ConnectionRequest.countDocuments({
       $or: [
         { recieverId: user._id, status: "accepted" },
-        {
-          senderId: user._id,
-          status: "accepted",
-        },
+        { senderId: user._id, status: "accepted" },
       ],
     });
 

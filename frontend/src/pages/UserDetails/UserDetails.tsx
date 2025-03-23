@@ -18,6 +18,7 @@ import ErrorIndicator from "../../components/ErrorIndicator";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import { UserNotFound } from "../../components/UserNotFound";
 import { UserProfileCard } from "../../components/UserProfileCard";
+import { useLikeHook } from "../../domain/misc_hooks";
 import { Post, UserProfile } from "../Profile/hooks";
 import { ConnectionStatus, useUserDetails } from "./hooks";
 
@@ -25,6 +26,7 @@ const UserDetails = () => {
   const params = useParams();
   const { id } = params;
   const { data, isError, isFetching } = useUserDetails(id);
+  const { invoke } = useLikeHook();
 
   if (isError) {
     return <ErrorIndicator />;
@@ -43,6 +45,7 @@ const UserDetails = () => {
       posts={data.posts}
       user={data.user}
       connectionStatus={data.connectionStatus}
+      invoke={invoke}
     />
   );
 };
@@ -52,6 +55,7 @@ export default UserDetails;
 type Props = {
   posts: Post[];
   user: UserProfile;
+  invoke: (input: string) => void;
   connectionStatus: ConnectionStatus;
 };
 
@@ -59,6 +63,7 @@ const UserDetailsView: React.FC<Props> = ({
   posts,
   user,
   connectionStatus,
+  invoke: likeHandler,
 }) => {
   return (
     <Box
@@ -80,27 +85,24 @@ const UserDetailsView: React.FC<Props> = ({
         onConnectionAction={() => {}}
       />
       {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
+        <PostCard
+          key={post._id}
+          post={post}
+          onLike={() => likeHandler(post._id)}
+        />
       ))}
     </Box>
   );
 };
 
-const PostCard = ({
-  post,
-  onLike,
-}: {
-  post: Post;
-  onLike?: (postId: string) => void;
-}) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
+const PostCard = ({ post, onLike }: { post: Post; onLike: () => void }) => {
+  const [isLiked, setIsLiked] = useState(post.isLiked ?? false);
+  const [likeCount, setLikeCount] = useState(post.likedCount ?? 0);
 
   const handleLike = () => {
-    // TODO: To be implemented
     setIsLiked(!isLiked);
     setLikeCount((prev) => prev + (isLiked ? -1 : 1));
-    onLike?.(post._id);
+    onLike();
   };
 
   return (
