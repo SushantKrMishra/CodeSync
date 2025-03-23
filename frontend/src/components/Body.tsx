@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AddPostPage } from "../pages/AddPost/AddPost";
-import { Connections } from "../pages/Connections/Connections";
+import Connections from "../pages/Connections/Connections";
+import { ConnectionsRequests } from "../pages/ConnectionsReqests/Connections";
 import { ConnectionsSuggestions } from "../pages/ConnectionSuggestion/ConnectionSuggestion";
 import EditPost from "../pages/EditPost/EditPost";
 import { Home } from "../pages/Home/Home";
@@ -36,6 +37,7 @@ const Body: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
         <Route path="/edit-post/:id" element={<EditPost />} />
         <Route path="/view-post/:id" element={<ViewPost />} />
         <Route path="/suggestions" element={<ConnectionsSuggestions />} />
+        <Route path="/connections-requests" element={<ConnectionsRequests />} />
         <Route path="/connections" element={<Connections />} />
         <Route path="*" element={<>Hello World! 😠</>} />
       </Route>

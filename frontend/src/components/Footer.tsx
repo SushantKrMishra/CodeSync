@@ -32,11 +32,11 @@ export default function Footer() {
             flexGrow: 1,
             textAlign: "center",
             position: "relative",
-            left: "175px",
+            left: "2rem",
           }}
         >
           <Typography variant="body2" sx={{ opacity: 0.8 }}>
-            © {new Date().getFullYear()} Code Sync. All rights reserved.
+            © {new Date().getFullYear()} CodeSync. All rights reserved.
           </Typography>
         </Box>
         <Box

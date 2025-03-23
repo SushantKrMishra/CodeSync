@@ -1,4 +1,11 @@
-import { AddBox, GroupAdd, Home, People, Person } from "@mui/icons-material";
+import {
+  AddBox,
+  GroupAdd,
+  Home,
+  LinkRounded,
+  People,
+  Person,
+} from "@mui/icons-material";
 import {
   List,
   ListItem,
@@ -27,7 +34,16 @@ const menuItems = [
   { icon: <Home />, text: "Home", path: "/" },
   { icon: <AddBox />, text: "Create Post", path: "/create-post" },
   { icon: <Person />, text: "My Profile", path: "/profile" },
-  { icon: <GroupAdd />, text: "Connections", path: "/connections" },
+  {
+    icon: <LinkRounded />,
+    text: "Connections",
+    path: "/connections",
+  },
+  {
+    icon: <GroupAdd />,
+    text: "Connection Requests",
+    path: "/connections-requests",
+  },
   { icon: <People />, text: "Search & Suggestions", path: "/suggestions" },
 ];
 

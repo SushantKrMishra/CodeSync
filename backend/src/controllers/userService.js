@@ -22,21 +22,32 @@ export const getUsers = async (req, res) => {
 export const getUser = async (req, res) => {
   try {
     const { id } = req.params;
+
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const posts = await Post.find({ postedBy: id }, "-postedBy -__v -createdAt")
       .sort({ updatedAt: -1 })
       .lean();
 
+    // Get connection status between logged-in user and requested user
     const connection = await ConnectionRequest.findOne({
       $or: [
         { senderId: req.user._id, recieverId: user._id },
         { senderId: user._id, recieverId: req.user._id },
+      ],
+    });
+
+    // Get follower count (number of users who sent accepted connection requests to this user)
+    const followerCount = await ConnectionRequest.countDocuments({
+      $or: [
+        { recieverId: user._id, status: "accepted" },
+        {
+          senderId: user._id,
+          status: "accepted",
+        },
       ],
     });
 
@@ -49,12 +60,10 @@ export const getUser = async (req, res) => {
       about: user.about,
       posts,
       connectionStatus: connection ? connection.status : "none",
+      followerCount,
     });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 

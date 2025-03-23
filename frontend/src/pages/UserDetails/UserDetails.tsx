@@ -77,7 +77,6 @@ const UserDetailsView: React.FC<Props> = ({
       <UserProfileCard
         user={user}
         connectionStatus={connectionStatus}
-        followersCount={0}
         onConnectionAction={() => {}}
       />
       {posts.map((post) => (

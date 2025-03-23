@@ -12,7 +12,7 @@ export type SignUpFormState = {
 
 export function useSignup(): MutationHookData<
   SignUpFormState,
-  "not-allowed" | void
+  "not-allowed" | "success" | void
 > {
   const mutation = useMutation({
     mutationKey: ["signup"],

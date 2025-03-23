@@ -25,9 +25,13 @@ export async function logoutApi(): Promise<void> {
 
 export async function signupApi(
   request: SignUpFormState
-): Promise<void | "not-allowed"> {
+): Promise<"success" | "not-allowed" | void> {
   try {
-    await apiClient.post(`/open/signup`, request);
+    const response = await apiClient.post(`/open/signup`, request);
+    if (response.status === 201) {
+      return "success";
+    }
+    return;
   } catch (err) {
     if (err instanceof AxiosError && err.status === 406) {
       return "not-allowed";
