@@ -1,27 +1,68 @@
+import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.js";
 import { Post } from "../models/posts.js";
 
 export const feeds = async (req, res) => {
   try {
-    let page = parseInt(req.query.page) || 1;
-    page = Math.min(page, 15);
-    let limit = parseInt(req.query.limit) || 10;
-    limit = Math.min(limit, 50);
+    let page = Math.min(parseInt(req.query.page) || 1, 15);
+    let limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const skip = (page - 1) * limit;
-    let posts = await Post.find({ postedBy: { $ne: req.user._id } })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .select("-createdAt -__v")
-      .populate(["postedBy"], "firstName lastName userName");
+    const userId = req.user._id;
 
-    posts = posts.sort(() => Math.random() - 0.5);
+    const posts = await Post.aggregate([
+      { $match: { postedBy: { $ne: userId } } },
+      { $sort: { updatedAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "likes",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            {
+              $group: {
+                _id: null,
+                likedCount: { $sum: 1 },
+                users: { $push: "$userId" },
+              },
+            },
+          ],
+          as: "likesData",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "postedBy",
+          foreignField: "_id",
+          as: "postedBy",
+        },
+      },
+      { $unwind: "$postedBy" },
+      {
+        $project: {
+          _id: 1,
+          imageUrl: 1,
+          content: 1,
+          updatedAt: 1,
+          postedBy: { firstName: 1, lastName: 1, userName: 1, _id: 1 },
+          likedCount: {
+            $ifNull: [{ $arrayElemAt: ["$likesData.likedCount", 0] }, 0],
+          },
+          isLiked: {
+            $in: [
+              userId,
+              { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
+            ],
+          },
+        },
+      },
+    ]);
+
     res.status(200).json({ posts });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };
 
@@ -144,33 +185,71 @@ export const getPost = async (req, res) => {
   try {
     const { id: postId } = req.params;
     if (!postId) {
-      return res.status(400).json({
-        message: "Bad request",
-      });
+      return res.status(400).json({ message: "Bad request" });
     }
 
-    const post = await Post.findById(postId)
-      .select("-__v -createdAt")
-      .populate("postedBy", "firstName lastName userName");
-    if (!post) {
-      return res.status(204).json({
-        message: "No post found",
-      });
+    const userId = req.user._id;
+
+    const post = await Post.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(postId) } },
+      {
+        $lookup: {
+          from: "likes",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            {
+              $group: {
+                _id: null,
+                likedCount: { $sum: 1 },
+                users: { $push: "$userId" },
+              },
+            },
+          ],
+          as: "likesData",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "postedBy",
+          foreignField: "_id",
+          as: "postedBy",
+        },
+      },
+      { $unwind: "$postedBy" },
+      {
+        $project: {
+          _id: 1,
+          imageUrl: 1,
+          content: 1,
+          updatedAt: 1,
+          postedBy: { firstName: 1, lastName: 1, userName: 1, _id: 1 },
+          likedCount: {
+            $ifNull: [{ $arrayElemAt: ["$likesData.likedCount", 0] }, 0],
+          },
+          isLiked: {
+            $in: [
+              userId,
+              { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
+            ],
+          },
+        },
+      },
+    ]);
+
+    if (!post.length) {
+      return res.status(204).json({ message: "No post found" });
     }
 
-    const isEditingAllowed = req.user._id.equals(post.postedBy._id);
+    const postData = post[0];
+    const isEditingAllowed = userId.equals(postData.postedBy._id);
+
     res.status(200).json({
       isEditingAllowed,
-      _id: post._id,
-      imageUrl: post.imageUrl,
-      postedBy: post.postedBy,
-      content: post.content,
-      updatedAt: post.updatedAt,
+      ...postData,
     });
   } catch (err) {
-    //TODO: Logger Here why it failed
-    res.status(500).json({
-      message: "Something went wrong",
-    });
+    res.status(500).json({ message: "Something went wrong" });
   }
 };

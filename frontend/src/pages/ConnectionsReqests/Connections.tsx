@@ -97,20 +97,30 @@ const ConnectionsView = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="mb-8">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.4 }}
+              className="text-center mb-8"
+            >
               <Typography
                 variant="h4"
                 fontWeight={700}
                 className="text-gray-800 mb-4"
               >
                 Received Requests
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  className="h-1 bg-gradient-to-r from-blue-500 to-purple-600 w-32 mt-2 rounded-full"
-                />
               </Typography>
-            </div>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.3,
+                  ease: "easeOut",
+                }}
+                className="h-1 mt-1 bg-gradient-to-r from-blue-500 to-purple-600 w-60 mx-auto rounded-full origin-center"
+              />
+            </motion.div>
 
             {received.length === 0 ? (
               <Typography variant="body1" className="text-center text-gray-600">
@@ -138,20 +148,31 @@ const ConnectionsView = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            <div className="mb-8">
+            {/* Updated Sent Requests Header */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.4 }}
+              className="text-center mb-8"
+            >
               <Typography
                 variant="h4"
                 fontWeight={700}
                 className="text-gray-800 mb-4"
               >
                 Sent Requests
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  className="h-1 bg-gradient-to-r from-green-500 to-cyan-600 w-32 mt-2 rounded-full"
-                />
               </Typography>
-            </div>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.3,
+                  ease: "easeOut",
+                }}
+                className="h-1 mt-1 bg-gradient-to-r from-green-500 to-cyan-600 w-60 mx-auto rounded-full origin-center"
+              />
+            </motion.div>
 
             {sent.length === 0 ? (
               <Typography variant="body1" className="text-center text-gray-600">

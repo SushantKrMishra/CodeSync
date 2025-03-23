@@ -19,6 +19,8 @@ export interface Post {
   content: string;
   updatedAt: string;
   imageUrl?: string;
+  isLiked?: boolean;
+  likedCount?: number;
 }
 
 export function useUserProfile(): QueryHookData<UserProfile> {

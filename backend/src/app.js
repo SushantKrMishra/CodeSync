@@ -5,6 +5,7 @@ import express from "express";
 import { connectDB } from "./config/database.js";
 import { userAuthMiddleware } from "./middlewares/userAuth.js";
 import connectionRoutes from "./routes/connectionRoutes.js";
+import engageRoutes from "./routes/engageRoutes.js";
 import feedRoutes from "./routes/feedRoutes.js";
 import userAuthRoutes from "./routes/userAuthRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -35,6 +36,7 @@ app.use("/images", userAuthMiddleware, express.static("images"));
 app.use("/api", userAuthMiddleware, userRoutes);
 app.use("/connection", userAuthMiddleware, connectionRoutes);
 app.use("/feed", userAuthMiddleware, feedRoutes);
+app.use("/engage", userAuthMiddleware, engageRoutes);
 
 app.use("/", (err, req, res, next) => {
   if (err) {

@@ -15,6 +15,8 @@ export interface FeedPost {
   content: string;
   updatedAt: string;
   imageUrl?: string;
+  isLiked: boolean;
+  likedCount: number;
 }
 
 export function useFeeds() {

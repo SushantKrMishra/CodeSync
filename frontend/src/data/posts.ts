@@ -66,6 +66,8 @@ export async function getPostById(
       updatedAt: response.data.updatedAt,
       imageUrl: response.data.imageUrl,
       isEditingAllowed: response.data.isEditingAllowed,
+      isLiked: response.data.isLiked,
+      likedCount: response.data.likedCount,
     };
   } catch (err) {
     if (err instanceof AxiosError && err.status === 400) {
