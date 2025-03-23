@@ -2,6 +2,37 @@ import mongoose from "mongoose";
 import { ConnectionRequest } from "../models/connectionRequest.js";
 import { User } from "../models/user.js";
 
+export const getConnections = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const connections = await ConnectionRequest.find({
+      $or: [{ senderId: userId }, { recieverId: userId }],
+      status: "accepted",
+    })
+      .populate("senderId", "firstName lastName userName about _id")
+      .populate("recieverId", "firstName lastName userName about _id")
+      .lean();
+
+    const connectedUsers = connections.reduce((acc, curr) => {
+      if (!curr.senderId._id.equals(userId)) {
+        acc.push(curr.senderId);
+      } else {
+        acc.push(curr.recieverId);
+      }
+      return acc;
+    }, new Array());
+
+    res.status(200).json({
+      data: connectedUsers,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
 export const sendConnectionRequest = async (req, res) => {
   try {
     const { id } = req.params;

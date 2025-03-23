@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import multer from "multer";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
@@ -33,6 +34,7 @@ export const createUser = async (req, res) => {
       lastName: payload.lastName,
       emailId: payload.emailId,
       password: await hashPassword(payload.password),
+      userName: randomUUID(),
     });
     await user.save();
     res.status(201).json({
@@ -45,6 +47,7 @@ export const createUser = async (req, res) => {
     }
     res.status(500).json({
       message: "Something went wrong",
+      err,
     });
   }
 };

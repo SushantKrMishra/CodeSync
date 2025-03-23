@@ -26,10 +26,13 @@ export default function SignUp() {
 
   const onSignupClick = async (payload: SignUpFormState) => {
     await invoke(payload);
-    if (data !== undefined) {
+  };
+
+  useEffect(() => {
+    if (data === "success") {
       navigate("/");
     }
-  };
+  }, [data, navigate]);
 
   return (
     <SignUpView
@@ -51,10 +54,10 @@ type ViewProps = {
 };
 
 const initialFormState: SignUpFormState = {
-  firstName: "",
+  firstName: "Sush",
   lastName: "",
-  emailId: "",
-  password: "",
+  emailId: "sush@test.com",
+  password: "sush@123",
 };
 
 const SignUpView: React.FC<ViewProps> = ({
@@ -76,18 +79,20 @@ const SignUpView: React.FC<ViewProps> = ({
   const onSignupClick = () => {
     const newErrors: Partial<SignUpFormState> = {};
 
-    if (!formState.firstName) {
-      newErrors.firstName = "⚠ Please enter your first name";
-    }
-
     if (!formState.emailId) {
       newErrors.emailId = "⚠ Please enter an email Id!";
     } else if (!validateEmailId(formState.emailId)) {
       newErrors.emailId = "❌ Please enter a valid email Id!";
     }
 
-    if (!formState.password) {
-      newErrors.password = "⚠ Please enter your password!";
+    if (!formState.password || formState.password.length < 8) {
+      newErrors.password = "⚠ Please enter a valid password!";
+    }
+
+    if (!formState.firstName) {
+      newErrors.firstName = "⚠ Please enter your first name!";
+    } else if (formState.firstName.length < 3) {
+      newErrors.firstName = "⚠ First name should be of minimum 3 characters!";
     }
 
     setErrors(newErrors);

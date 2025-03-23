@@ -58,6 +58,7 @@ export async function getUserDetails(
         age: response.data.age,
         gender: response.data.gender,
         about: response.data.about,
+        followersCount: response.data.followerCount,
       },
       connectionStatus: convertStringToConnectionStatus(
         response.data.connectionStatus

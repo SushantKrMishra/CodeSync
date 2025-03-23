@@ -6,12 +6,10 @@ import { ConnectionStatus } from "../pages/UserDetails/hooks";
 export const UserProfileCard = ({
   user,
   connectionStatus,
-  followersCount,
   onConnectionAction,
 }: {
   user: UserProfile;
   connectionStatus: ConnectionStatus;
-  followersCount: number;
   onConnectionAction: () => void;
 }) => {
   const getButtonConfig = () => {
@@ -90,7 +88,7 @@ export const UserProfileCard = ({
 
         <div className="text-center ">
           <Typography variant="body2" color="#444" fontWeight={500}>
-            {followersCount}
+            {user.followersCount ?? 0}
           </Typography>
           <Typography variant="caption" color="#666">
             Followers

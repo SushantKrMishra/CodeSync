@@ -11,6 +11,7 @@ export interface UserProfile {
   gender: string;
   userName: string;
   about?: string;
+  followersCount?: number;
 }
 
 export interface Post {

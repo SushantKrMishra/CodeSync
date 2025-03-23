@@ -43,8 +43,8 @@ export const createPost = async (req, res) => {
     const { content } = req.body;
     const imageUrl = req.file?.path;
 
-    if (!imageUrl) {
-      return res.status(400).json({ message: "Image upload failed" });
+    if (!imageUrl && !content) {
+      return res.status(400).json({ message: "Bad Request" });
     }
 
     const post = await Post.create({

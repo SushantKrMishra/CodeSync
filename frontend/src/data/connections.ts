@@ -1,7 +1,16 @@
 import { mapAndThrowError } from "../domain/utils";
-import { HandleConnection } from "../pages/Connections/hooks";
+import { HandleConnection } from "../pages/ConnectionsReqests/hooks";
 import { ConnectionUser } from "../pages/ConnectionSuggestion/hooks";
 import { apiClient } from "./apiClient";
+
+export async function getConnections(): Promise<ConnectionUser[]> {
+  try {
+    const response = await apiClient.get("/connection");
+    return response.data.data;
+  } catch (err) {
+    mapAndThrowError(err);
+  }
+}
 
 export async function getConnectionSuggestions(): Promise<ConnectionUser[]> {
   try {
