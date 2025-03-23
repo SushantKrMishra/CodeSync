@@ -4,7 +4,7 @@ import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
 import { Post } from "../Profile/hooks";
 
-export type PostFormState = Pick<Post, "content" | "imageUrl">;
+export type PostFormState = Pick<Post, "content"> & { imageFile?: File };
 
 export function useCreatePost(): MutationHookData<PostFormState, void> {
   const client = useQueryClient();

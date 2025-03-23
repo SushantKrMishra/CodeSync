@@ -8,9 +8,15 @@ import { apiClient } from "./apiClient";
 
 export async function createPost(request: PostFormState): Promise<void> {
   try {
-    await apiClient.post("/feed/create", {
-      content: request.content,
-      imageUrl: request.imageUrl,
+    const formData = new FormData();
+    formData.append("content", request.content);
+    if (request.imageFile) {
+      formData.append("image", request.imageFile);
+    }
+    await apiClient.post("/feed/create", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
   } catch (err) {
     mapAndThrowError(err);
@@ -71,7 +77,18 @@ export async function getPostById(
 
 export async function updatePost(request: UpdatePost): Promise<void> {
   try {
-    await apiClient.patch("/feed/" + request.id, { ...request.data });
+    const formData = new FormData();
+    if (request.data.content) {
+      formData.append("content", request.data.content);
+    }
+    if (request.data.imageFile) {
+      formData.append("image", request.data.imageFile);
+    }
+    await apiClient.patch("/feed/" + request.id, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   } catch (err) {
     mapAndThrowError(err);
   }

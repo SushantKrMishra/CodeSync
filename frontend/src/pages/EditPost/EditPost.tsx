@@ -1,19 +1,25 @@
 import {
-  AddPhotoAlternate,
   Close,
+  Delete,
   Description,
   Save,
+  UploadFile,
 } from "@mui/icons-material";
-import { Button, InputAdornment, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import { EditNotAllowed } from "../../components/EditNotAllowed";
 import ErrorIndicator from "../../components/ErrorIndicator";
 import LoadingIndicator from "../../components/LoadingIndicator";
 import { PostNotFound } from "../../components/PostNotFound";
-import { getChangedFields, isValidUrl } from "../../domain/utils";
 import { PostFormState } from "../AddPost/hooks";
 import { FeedPost } from "../Home/hooks";
 import { usePost, useUpdatePost } from "./hooks";
@@ -33,10 +39,7 @@ const EditPost = () => {
   };
 
   const onSubmit = async (formState: PostFormState) => {
-    const changedValues = getChangedFields(data as FeedPost, formState);
-    if (Object.keys(changedValues).length > 0) {
-      await invoke({ data: changedValues, id: id! });
-    }
+    await invoke({ data: formState, id: id! });
     navigate(-1);
   };
 
@@ -82,20 +85,37 @@ const EditPostView: React.FC<Props> = ({
   isSubmitting,
 }) => {
   const [formState, setFormState] = useState<PostFormState>(data);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   const [errors, setErrors] = useState<{
     content?: string;
     imageUrl?: string;
   }>({});
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFormState((prev) => ({ ...prev, imageFile: file }));
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setFormState((prev) => ({ ...prev, imageFile: undefined }));
+    setImagePreview(null);
+  };
+
+  useEffect(() => {
+    if (data.imageUrl) {
+      setImagePreview(data.imageUrl);
+    }
+  }, [data]);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
 
     if (!formState.content.trim()) {
       newErrors.content = "Content is required";
-    }
-
-    if (formState.imageUrl && !isValidUrl(formState.imageUrl)) {
-      newErrors.imageUrl = "Please enter a valid URL";
     }
 
     setErrors(newErrors);
@@ -189,51 +209,65 @@ const EditPostView: React.FC<Props> = ({
                 }}
               />
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <TextField
-                label="Image URL"
-                variant="outlined"
-                fullWidth
-                value={formState.imageUrl ?? ""}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    imageUrl: e.target.value,
-                  }))
-                }
-                error={!!errors.imageUrl}
-                helperText={errors.imageUrl}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <motion.div whileHover={{ rotate: 15 }}>
-                        <AddPhotoAlternate />
-                      </motion.div>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "12px",
-                    "&:hover fieldset": {
-                      borderColor: "#6366f1",
-                    },
-                  },
-                }}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                hidden
+                id="image-upload"
               />
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 1, display: "block" }}
-              >
-                Note: Image upload functionality is not yet implemented. We're
-                working on it! We are supporting image URL as of now!
-              </Typography>
+              {imagePreview && (
+                <div className="relative mt-2 w-full max-h-64 group">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-contain rounded-lg shadow"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <label htmlFor="image-upload">
+                      <IconButton
+                        component="span"
+                        sx={{
+                          backgroundColor: "rgba(255, 255, 255, 0.8)",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          },
+                        }}
+                      >
+                        <UploadFile fontSize="small" />
+                      </IconButton>
+                    </label>
+                    <IconButton
+                      onClick={handleDeleteImage}
+                      sx={{
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        },
+                      }}
+                    >
+                      <Delete fontSize="small" color="error" />
+                    </IconButton>
+                  </div>
+                </div>
+              )}
+              {!imagePreview && (
+                <label htmlFor="image-upload">
+                  <Button
+                    variant="contained"
+                    component="span"
+                    startIcon={<UploadFile />}
+                    sx={{ borderRadius: "12px", textTransform: "none" }}
+                  >
+                    Add Image
+                  </Button>
+                </label>
+              )}
             </motion.div>
 
             <motion.div
