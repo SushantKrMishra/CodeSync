@@ -1,20 +1,18 @@
-import { AddPhotoAlternate, Description, Save } from "@mui/icons-material";
+import { Description, Save, UploadFile } from "@mui/icons-material";
 import { Button, InputAdornment, TextField, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
 import ErrorIndicator from "../../components/ErrorIndicator";
-import { isValidUrl } from "../../domain/utils";
 import { PostFormState, useCreatePost } from "./hooks";
 
 export const AddPostPage = () => {
   const { invoke, isError, isPending } = useCreatePost();
   const navigate = useNavigate();
 
-  const handleSubmit = async (content: string, imageUrl?: string) => {
-    console.log(content, imageUrl);
-    await invoke({ content, imageUrl });
+  const handleSubmit = async (content: string, imageFile?: File) => {
+    await invoke({ content, imageFile });
     navigate("/profile");
   };
 
@@ -33,14 +31,15 @@ const AddPostPageView = ({
   onSubmit,
   isSubmitting,
 }: {
-  onSubmit: (content: string, imageUrl?: string) => Promise<void>;
+  onSubmit: (content: string, imageFile?: File) => Promise<void>;
   isSubmitting: boolean;
 }) => {
   const [formState, setFormState] = useState<PostFormState>(initialFormState);
-  const [errors, setErrors] = useState<{
-    content?: string;
-    imageUrl?: string;
-  }>({});
+  const [errors, setErrors] = useState<{ content?: string; image?: string }>(
+    {}
+  );
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -49,17 +48,21 @@ const AddPostPageView = ({
       newErrors.content = "Content is required";
     }
 
-    if (formState.imageUrl && !isValidUrl(formState.imageUrl)) {
-      newErrors.imageUrl = "Please enter a valid URL";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      await onSubmit(formState.content, formState.imageUrl);
+      await onSubmit(formState.content, selectedFile ?? undefined);
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -150,45 +153,30 @@ const AddPostPageView = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <TextField
-                label="Image URL"
-                variant="outlined"
-                fullWidth
-                value={formState.imageUrl ?? ""}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    imageUrl: e.target.value,
-                  }))
-                }
-                error={!!errors.imageUrl}
-                helperText={errors.imageUrl}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <motion.div whileHover={{ rotate: 15 }}>
-                        <AddPhotoAlternate />
-                      </motion.div>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "12px",
-                    "&:hover fieldset": {
-                      borderColor: "#6366f1",
-                    },
-                  },
-                }}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                hidden
+                id="image-upload"
               />
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 1, display: "block" }}
-              >
-                Note: Image upload functionality is not yet implemented. We're
-                working on it! We are supporting image URL as of now!
-              </Typography>
+              <label htmlFor="image-upload">
+                <Button
+                  variant="contained"
+                  component="span"
+                  startIcon={<UploadFile />}
+                  sx={{ borderRadius: "12px", textTransform: "none" }}
+                >
+                  Upload Image
+                </Button>
+              </label>
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-2 w-full max-h-64 object-contain rounded-lg shadow"
+                />
+              )}
             </motion.div>
 
             <motion.div
@@ -233,7 +221,7 @@ const AddPostPageView = ({
         </motion.div>
       </div>
 
-      <ApplyModal show={isSubmitting} message="Creating your post..." />
+      <ApplyModal show={isSubmitting} message="Crafting your post..." />
     </>
   );
 };

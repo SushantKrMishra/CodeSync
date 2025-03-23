@@ -22,11 +22,11 @@ import { SignUpFormState, useSignup } from "./hooks";
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { invoke, data, isError, isPending, isSuccess } = useSignup();
+  const { invoke, data, isError, isPending } = useSignup();
 
-  const onSignupClick = (payload: SignUpFormState) => {
-    invoke(payload);
-    if (isSuccess) {
+  const onSignupClick = async (payload: SignUpFormState) => {
+    await invoke(payload);
+    if (data !== undefined) {
       navigate("/");
     }
   };
@@ -302,7 +302,6 @@ const SignUpView: React.FC<ViewProps> = ({
 
       <ApplyModal show={isPending} message="Processing your request..." />
 
-      {/* Error Snackbar */}
       <Snackbar
         open={errorOpen}
         autoHideDuration={4000}

@@ -26,7 +26,6 @@ export default function Login() {
 
   const onLogin = (data: LoginFormState) => {
     invoke(data);
-    navigate("/");
   };
 
   return (

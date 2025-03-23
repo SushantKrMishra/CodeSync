@@ -31,6 +31,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/open", userAuthRoutes);
+app.use("/images", userAuthMiddleware, express.static("images"));
 app.use("/api", userAuthMiddleware, userRoutes);
 app.use("/connection", userAuthMiddleware, connectionRoutes);
 app.use("/feed", userAuthMiddleware, feedRoutes);

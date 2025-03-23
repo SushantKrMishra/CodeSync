@@ -1,11 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getUserProfile,
-  updateUserProfile,
-} from "../../data/profile";
+import { deletePost, getUserPosts } from "../../data/posts";
+import { getUserProfile, updateUserProfile } from "../../data/profile";
 import { MutationHookData, QueryHookData } from "../../domain/hook_data";
 import { deriveMutationState, deriveQueryState } from "../../domain/hook_impl";
-import { deletePost, getUserPosts } from "../../data/posts";
 
 export interface UserProfile {
   firstName: string;

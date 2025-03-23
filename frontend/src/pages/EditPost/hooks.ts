@@ -17,7 +17,7 @@ export function usePost(
 }
 
 export type UpdatePost = {
-  data: Partial<PostFormState>;
+  data: PostFormState;
   id: string;
 };
 

@@ -99,7 +99,7 @@ export const UserPosts = ({
                   <CardMedia
                     component="img"
                     height="400"
-                    image={post.imageUrl}
+                    src={post.imageUrl}
                     alt="Post image"
                     className="object-cover cursor-pointer"
                   />

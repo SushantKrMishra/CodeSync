@@ -1,6 +1,8 @@
+import multer from "multer";
 import { User } from "../models/user.js";
 import { comparePassword, hashPassword } from "../utils/passwordHasher.js";
 import { validateLoginData, validateSignupData } from "../utils/validation.js";
+const upload = multer({ dest: "../images/profile" });
 
 export const sessionAuthValid = async (req, res) => {
   //We are sure that user passed middleware check
