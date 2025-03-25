@@ -9,6 +9,14 @@ interface FeedUserInfo {
   _id: string;
 }
 
+export interface FeedComment {
+  _id: string;
+  userId: FeedUserInfo;
+  userComment: string;
+  createdAt: string;
+  isDeleteAllowed: boolean;
+}
+
 export interface FeedPost {
   _id: string;
   postedBy: FeedUserInfo;
@@ -17,6 +25,8 @@ export interface FeedPost {
   imageUrl?: string;
   isLiked: boolean;
   likedCount: number;
+  commentsCount: number;
+  comments: FeedComment[];
 }
 
 export function useFeeds() {

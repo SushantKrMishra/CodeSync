@@ -19,3 +19,25 @@ export async function likeHandler(id: string): Promise<void> {
     mapAndThrowError(err);
   }
 }
+
+export async function commentPostHandler(data: {
+  postId: string;
+  comment: string;
+}): Promise<string> {
+  try {
+    const response = await apiClient.post("/engage/comment/" + data.postId, {
+      userComment: data.comment,
+    });
+    return response.data.id;
+  } catch (err) {
+    mapAndThrowError(err);
+  }
+}
+
+export async function commentDeleteHandler(data: string): Promise<void> {
+  try {
+    await apiClient.delete("/engage/comment/" + data);
+  } catch (err) {
+    mapAndThrowError(err);
+  }
+}

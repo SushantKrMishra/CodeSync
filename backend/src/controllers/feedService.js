@@ -8,12 +8,13 @@ export const feeds = async (req, res) => {
     let limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const skip = (page - 1) * limit;
     const userId = req.user._id;
-
     const posts = await Post.aggregate([
       { $match: { postedBy: { $ne: userId } } },
       { $sort: { updatedAt: -1 } },
       { $skip: skip },
       { $limit: limit },
+
+      // Lookup likes
       {
         $lookup: {
           from: "likes",
@@ -31,6 +32,43 @@ export const feeds = async (req, res) => {
           as: "likesData",
         },
       },
+
+      // Lookup comments
+      {
+        $lookup: {
+          from: "comments",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            { $sort: { createdAt: -1 } },
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "userDetails",
+              },
+            },
+            { $unwind: "$userDetails" },
+            {
+              $project: {
+                _id: 1,
+                userId: {
+                  _id: "$userDetails._id",
+                  firstName: "$userDetails.firstName",
+                  lastName: "$userDetails.lastName",
+                  userName: "$userDetails.userName",
+                },
+                userComment: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+          as: "comments",
+        },
+      },
+
+      // Lookup postedBy details
       {
         $lookup: {
           from: "users",
@@ -40,6 +78,8 @@ export const feeds = async (req, res) => {
         },
       },
       { $unwind: "$postedBy" },
+
+      // Final projection
       {
         $project: {
           _id: 1,
@@ -56,6 +96,8 @@ export const feeds = async (req, res) => {
               { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
             ],
           },
+          commentsCount: { $size: "$comments" },
+          comments: 1,
         },
       },
     ]);
@@ -192,6 +234,8 @@ export const getPost = async (req, res) => {
 
     const post = await Post.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(postId) } },
+    
+      // Lookup likes
       {
         $lookup: {
           from: "likes",
@@ -209,6 +253,49 @@ export const getPost = async (req, res) => {
           as: "likesData",
         },
       },
+    
+      // Lookup comments and populate users
+      {
+        $lookup: {
+          from: "comments",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            { $sort: { createdAt: -1 } },
+    
+            // Lookup user details for each comment
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "userDetails",
+              },
+            },
+            { $unwind: "$userDetails" },
+    
+            {
+              $project: {
+                _id: 1,
+                userId: {
+                  _id: "$userDetails._id",
+                  firstName: "$userDetails.firstName",
+                  lastName: "$userDetails.lastName",
+                  userName: "$userDetails.userName",
+                },
+                userComment: 1,
+                createdAt: 1,
+                isDeleteAllowed: {
+                  $eq: ["$userId", new mongoose.Types.ObjectId(req.user._id)],
+                },
+              },
+            },
+          ],
+          as: "comments",
+        },
+      },
+    
+      // Lookup postedBy details
       {
         $lookup: {
           from: "users",
@@ -218,6 +305,7 @@ export const getPost = async (req, res) => {
         },
       },
       { $unwind: "$postedBy" },
+    
       {
         $project: {
           _id: 1,
@@ -229,14 +317,14 @@ export const getPost = async (req, res) => {
             $ifNull: [{ $arrayElemAt: ["$likesData.likedCount", 0] }, 0],
           },
           isLiked: {
-            $in: [
-              userId,
-              { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
-            ],
+            $in: [userId, { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] }],
           },
+          commentsCount: { $size: "$comments" },
+          comments: 1,
         },
       },
     ]);
+    
 
     if (!post.length) {
       return res.status(204).json({ message: "No post found" });
