@@ -21,7 +21,7 @@ const ViewPost = () => {
     return <PostNotFound />;
   }
 
-  return <FeedPosts posts={[data]} />;
+  return <FeedPosts posts={[data]} isSingleView={true} />;
 };
 
 export default ViewPost;
