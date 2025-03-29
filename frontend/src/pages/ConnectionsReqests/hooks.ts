@@ -36,6 +36,9 @@ export function useWithdrawConnectionRequest(): MutationHookData<string, void> {
       await client.invalidateQueries({
         queryKey: ["sendConnections"],
       });
+      await client.invalidateQueries({
+        queryKey: ["userDetail"],
+      });
     },
   });
   return deriveMutationState(mut);
@@ -45,7 +48,10 @@ export type HandleConnection = {
   id: string;
   status: "accepted" | "rejected";
 };
-export function useHandleConnectionRequest(): MutationHookData<HandleConnection, void> {
+export function useHandleConnectionRequest(): MutationHookData<
+  HandleConnection,
+  void
+> {
   const client = useQueryClient();
   const mut = useMutation({
     mutationKey: ["handleConnection"],
@@ -53,6 +59,9 @@ export function useHandleConnectionRequest(): MutationHookData<HandleConnection,
     onSuccess: async () => {
       await client.invalidateQueries({
         queryKey: ["recivedConnections"],
+      });
+      await client.invalidateQueries({
+        queryKey: ["userDetail"],
       });
     },
   });

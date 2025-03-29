@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.js";
+import { Comment } from "../models/comments.js";
 import { Post } from "../models/posts.js";
 
 export const feeds = async (req, res) => {
@@ -110,9 +111,62 @@ export const feeds = async (req, res) => {
 
 export const getMyPosts = async (req, res) => {
   try {
-    const data = await Post.find({ postedBy: req.user._id }, "-postedBy -__v")
-      .sort({ createdAt: -1 })
-      .lean();
+    const userId = req.user._id;
+
+    const data = await Post.aggregate([
+      { $match: { postedBy: new mongoose.Types.ObjectId(userId) } },
+      { $sort: { createdAt: -1 } },
+
+      // Lookup comments and populate users
+      {
+        $lookup: {
+          from: "comments",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            { $sort: { createdAt: -1 } },
+
+            // Populate user details for each comment
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "userDetails",
+              },
+            },
+            { $unwind: "$userDetails" },
+
+            {
+              $project: {
+                _id: 1,
+                userId: {
+                  _id: "$userDetails._id",
+                  firstName: "$userDetails.firstName",
+                  lastName: "$userDetails.lastName",
+                  userName: "$userDetails.userName",
+                },
+                userComment: 1,
+                createdAt: 1,
+              },
+            },
+          ],
+          as: "comments",
+        },
+      },
+
+      {
+        $project: {
+          _id: 1,
+          imageUrl: 1,
+          content: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          commentsCount: { $size: "$comments" },
+          comments: 1,
+        },
+      },
+    ]);
 
     res.status(200).json({ data });
   } catch (err) {
@@ -161,6 +215,8 @@ export const deletePost = async (req, res) => {
       await cloudinary.uploader.destroy(`posts/${publicId}`);
     }
 
+    await Comment.deleteMany({ postId });
+    
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong" });
@@ -234,7 +290,7 @@ export const getPost = async (req, res) => {
 
     const post = await Post.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(postId) } },
-    
+
       // Lookup likes
       {
         $lookup: {
@@ -253,7 +309,7 @@ export const getPost = async (req, res) => {
           as: "likesData",
         },
       },
-    
+
       // Lookup comments and populate users
       {
         $lookup: {
@@ -262,7 +318,7 @@ export const getPost = async (req, res) => {
           pipeline: [
             { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
             { $sort: { createdAt: -1 } },
-    
+
             // Lookup user details for each comment
             {
               $lookup: {
@@ -273,7 +329,7 @@ export const getPost = async (req, res) => {
               },
             },
             { $unwind: "$userDetails" },
-    
+
             {
               $project: {
                 _id: 1,
@@ -294,7 +350,7 @@ export const getPost = async (req, res) => {
           as: "comments",
         },
       },
-    
+
       // Lookup postedBy details
       {
         $lookup: {
@@ -305,7 +361,7 @@ export const getPost = async (req, res) => {
         },
       },
       { $unwind: "$postedBy" },
-    
+
       {
         $project: {
           _id: 1,
@@ -317,14 +373,16 @@ export const getPost = async (req, res) => {
             $ifNull: [{ $arrayElemAt: ["$likesData.likedCount", 0] }, 0],
           },
           isLiked: {
-            $in: [userId, { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] }],
+            $in: [
+              userId,
+              { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
+            ],
           },
           commentsCount: { $size: "$comments" },
           comments: 1,
         },
       },
     ]);
-    
 
     if (!post.length) {
       return res.status(204).json({ message: "No post found" });

@@ -160,7 +160,7 @@ const PostCard = ({
             <CardMedia
               component="img"
               sx={{
-                height: { xs: 200, sm: 300 },
+                height: { xs: 200, sm: "auto" },
                 objectFit: "cover",
                 borderTopLeftRadius: 12,
                 borderTopRightRadius: 12,
@@ -258,6 +258,10 @@ const PostCard = ({
 
           {showComments && (
             <Box
+              component={motion.div}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               sx={{
                 mt: 2,
                 pt: 2,
@@ -265,170 +269,213 @@ const PostCard = ({
                 borderColor: "divider",
                 cursor: "auto",
               }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
             >
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                 Comments ({commentsCount})
               </Typography>
 
-              {comments.length === 0 ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    textAlign: "center",
-                    color: "text.secondary",
-                    py: 2,
-                  }}
-                >
-                  No comments yet. Be the first to comment!
-                </Typography>
-              ) : (
-                (isSingleView ? comments : comments.slice(0, 2)).map(
-                  (comment) => (
-                    <Box
-                      key={comment._id}
+              <Box
+                component={motion.div}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                sx={{
+                  maxHeight: isSingleView ? "500px" : 300, 
+                  overflowY: "auto",
+                  pr: 1,
+                  "&::-webkit-scrollbar": {
+                    width: "6px",
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    background: "transparent",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    background: "#ddd",
+                    borderRadius: "4px",
+                  },
+                }}
+              >
+                {comments.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Typography
+                      variant="body2"
                       sx={{
-                        mb: 2,
-                        p: 1.5,
-                        borderRadius: 2,
-                        bgcolor: "action.hover",
-                        width: "100%",
-                        minWidth: 0,
+                        textAlign: "center",
+                        color: "text.secondary",
+                        py: 2,
                       }}
                     >
+                      No comments yet. Be the first to comment!
+                    </Typography>
+                  </motion.div>
+                ) : (
+                  comments.map((comment) => (
+                    <motion.div
+                      key={comment._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
                       <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                        sx={{
+                          mb: 2,
+                          p: 1.5,
+                          borderRadius: 2,
+                          bgcolor: "action.hover",
+                          width: "100%",
+                          minWidth: 0,
+                        }}
                       >
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            "&:hover": { textDecoration: "underline" },
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onUserClick(comment.userId._id);
-                          }}
-                        >
-                          {comment.userId.firstName} {comment.userId.lastName}
-                        </Typography>
-                        {comment.userId.userName && (
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary", ml: 1 }}
-                          >
-                            @{comment.userId.userName}
-                          </Typography>
-                        )}
-
                         <Box
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            ml: "auto",
+                            mb: 1,
                           }}
                         >
-                          {comment.isDeleteAllowed && (
-                            <IconButton
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteClick(comment);
-                              }}
-                              size="small"
-                              sx={{ color: "text.secondary" }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
                           <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary", ml: 1 }}
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              cursor: "pointer",
+                              "&:hover": { textDecoration: "underline" },
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUserClick(comment.userId._id);
+                            }}
                           >
-                            {new Date(comment.createdAt).toLocaleTimeString(
-                              [],
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
+                            {comment.userId.firstName} {comment.userId.lastName}
                           </Typography>
-                        </Box>
-                      </Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        {comment.userComment}
-                      </Typography>
-                    </Box>
-                  )
-                )
-              )}
+                          {comment.userId.userName && (
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary", ml: 1 }}
+                            >
+                              @{comment.userId.userName}
+                            </Typography>
+                          )}
 
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  mt: 2,
-                  "&:hover .MuiOutlinedInput-root": {
-                    borderColor: "primary.main",
-                  },
-                }}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              ml: "auto",
+                            }}
+                          >
+                            {comment.isDeleteAllowed && (
+                              <IconButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteClick(comment);
+                                }}
+                                size="small"
+                                sx={{ color: "text.secondary" }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary", ml: 1 }}
+                            >
+                              {new Date(comment.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                            overflowWrap: "break-word",
+                          }}
+                        >
+                          {comment.userComment}
+                        </Typography>
+                      </Box>
+                    </motion.div>
+                  ))
+                )}
+              </Box>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
               >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  placeholder="Write a comment..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                    if (e.key === "Enter") {
-                      e.stopPropagation();
-                      handleCommentSubmit();
-                    }
-                  }}
+                <Box
                   sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 20,
-                      backgroundColor: "action.hover",
-                      "&.Mui-focused": {
-                        backgroundColor: "background.paper",
-                        borderColor: "primary.main",
-                      },
-                    },
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCommentSubmit();
-                  }}
-                  disabled={!newComment.trim()}
-                  sx={{
-                    borderRadius: 20,
-                    textTransform: "none",
-                    boxShadow: "none",
-                    backgroundColor: "#212121",
-                    "&:disabled": {
-                      backgroundColor: "action.disabledBackground",
-                      color: "text.disabled",
+                    display: "flex",
+                    gap: 1,
+                    mt: 2,
+                    "&:hover .MuiOutlinedInput-root": {
+                      borderColor: "primary.main",
                     },
                   }}
                 >
-                  Post
-                </Button>
-              </Box>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    placeholder="Write a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (e.key === "Enter") {
+                        e.stopPropagation();
+                        handleCommentSubmit();
+                      }
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 20,
+                        backgroundColor: "action.hover",
+                        "&.Mui-focused": {
+                          backgroundColor: "background.paper",
+                          borderColor: "primary.main",
+                        },
+                      },
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCommentSubmit();
+                    }}
+                    disabled={!newComment.trim()}
+                    sx={{
+                      borderRadius: 20,
+                      textTransform: "none",
+                      boxShadow: "none",
+                      backgroundColor: "#212121",
+                      "&:disabled": {
+                        backgroundColor: "action.disabledBackground",
+                        color: "text.disabled",
+                      },
+                    }}
+                  >
+                    Post
+                  </Button>
+                </Box>
+              </motion.div>
             </Box>
           )}
         </CardContent>

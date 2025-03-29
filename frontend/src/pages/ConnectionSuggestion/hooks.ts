@@ -26,6 +26,9 @@ export const useSendConnectionRequest = (): MutationHookData<string, void> => {
       await client.invalidateQueries({
         queryKey: ["connectionSuggestions"],
       });
+      await client.invalidateQueries({
+        queryKey: ["userDetail"],
+      });
     },
   });
   return deriveMutationState(mutation);

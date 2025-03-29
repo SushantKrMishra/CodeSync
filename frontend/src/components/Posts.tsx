@@ -1,5 +1,7 @@
 import { Delete, Edit } from "@mui/icons-material";
 import {
+  Avatar,
+  Box,
   Card,
   CardContent,
   CardMedia,
@@ -7,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { Post } from "../pages/Profile/hooks";
+import { FeedPost } from "../pages/Home/hooks";
 import ApplyModal from "./ApplyingModal";
 
 export const UserPosts = ({
@@ -15,11 +17,15 @@ export const UserPosts = ({
   onDeleteClick,
   onEditClick,
   isDeleting,
+  onDeleteCommentClick,
+  isCommentDeleting,
 }: {
-  posts: Post[];
+  posts: FeedPost[];
   onDeleteClick: (postid: string) => void;
   onEditClick: (postid: string) => void;
   isDeleting: boolean;
+  onDeleteCommentClick: (id: string) => void;
+  isCommentDeleting: boolean;
 }) => {
   return (
     <>
@@ -123,10 +129,124 @@ export const UserPosts = ({
                 </Typography>
               </CardContent>
             </Card>
+            {post.comments.length > 0 && (
+              <Box
+                sx={{
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                  p: 3,
+                }}
+              >
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                  Comments ({post.comments.length})
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    maxHeight: 300, // Set max height for scrolling
+                    overflowY: "auto",
+                    pr: 1,
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      background: "transparent",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      background: "#ddd",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
+                  {post.comments.map((comment) => (
+                    <Box
+                      key={comment._id}
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 2,
+                        p: 1.5,
+                        borderRadius: 2,
+                        bgcolor: "action.hover",
+                        position: "relative",
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          bgcolor: "primary.main",
+                          fontSize: "0.875rem",
+                        }}
+                      >
+                        {comment.userId.firstName[0]}
+                      </Avatar>
+
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 500, mr: 1 }}
+                          >
+                            {comment.userId.firstName} {comment.userId.lastName}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: "text.secondary" }}
+                          >
+                            @{comment.userId.userName}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2">
+                          {comment.userComment}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            display: "block",
+                            mt: 0.5,
+                          }}
+                        >
+                          {new Date(comment.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </Typography>
+                      </Box>
+
+                      <IconButton
+                        aria-label="Delete comment"
+                        onClick={() => onDeleteCommentClick(comment._id)}
+                        sx={{
+                          color: "error.main",
+                          "&:hover": { bgcolor: "error.light" },
+                          ml: "auto",
+                        }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
           </motion.div>
         ))}
       </motion.div>
       <ApplyModal show={isDeleting} message="Processing post delete..." />
+      <ApplyModal
+        show={isCommentDeleting}
+        message="Processing comment delete..."
+      />
     </>
   );
 };

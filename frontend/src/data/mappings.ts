@@ -12,6 +12,8 @@ export function convertStringToConnectionStatus(
       return ConnectionStatus.Accepted;
     case "rejected":
       return ConnectionStatus.Rejected;
+    case "received":
+      return ConnectionStatus.Recieved;
     default:
       throw new Error(`Invalid Connection status: ${data}`);
   }
