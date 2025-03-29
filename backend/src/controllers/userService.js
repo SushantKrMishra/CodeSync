@@ -34,8 +34,15 @@ export const getUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const isSelf = userId.equals(id);
+
+    // Get total number of posts
+    const postsCount = await Post.countDocuments({ postedBy: id });
+
     const posts = await Post.aggregate([
       { $match: { postedBy: new mongoose.Types.ObjectId(id) } },
+
+      // Lookup likes
       {
         $lookup: {
           from: "likes",
@@ -53,6 +60,48 @@ export const getUser = async (req, res) => {
           as: "likesData",
         },
       },
+
+      // Lookup comments and populate users
+      {
+        $lookup: {
+          from: "comments",
+          let: { postId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+            { $sort: { createdAt: -1 } },
+
+            // Populate user details for each comment
+            {
+              $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "userDetails",
+              },
+            },
+            { $unwind: "$userDetails" },
+
+            {
+              $project: {
+                _id: 1,
+                userId: {
+                  _id: "$userDetails._id",
+                  firstName: "$userDetails.firstName",
+                  lastName: "$userDetails.lastName",
+                  userName: "$userDetails.userName",
+                },
+                userComment: 1,
+                createdAt: 1,
+                isDeleteAllowed: {
+                  $eq: ["$userId", new mongoose.Types.ObjectId(userId)],
+                },
+              },
+            },
+          ],
+          as: "comments",
+        },
+      },
+
       {
         $project: {
           _id: 1,
@@ -68,20 +117,33 @@ export const getUser = async (req, res) => {
               { $ifNull: [{ $arrayElemAt: ["$likesData.users", 0] }, []] },
             ],
           },
+          commentsCount: { $size: "$comments" },
+          comments: 1,
         },
       },
       { $sort: { updatedAt: -1 } },
     ]);
 
     // Get connection status between logged-in user and requested user
-    const connection = await ConnectionRequest.findOne({
-      $or: [
-        { senderId: userId, recieverId: user._id },
-        { senderId: user._id, recieverId: userId },
-      ],
-    });
+    const connection = await ConnectionRequest.findOne(
+      {
+        $or: [
+          { senderId: userId, recieverId: user._id },
+          { senderId: user._id, recieverId: userId },
+        ],
+      },
+      { senderId: 1, status: 1 }
+    ).lean();
 
-    // Get follower count (number of users who sent accepted connection requests to this user)
+    const connectionStatus = connection
+      ? connection.status === "pending"
+        ? connection.senderId.toString() === userId.toString()
+          ? "pending"
+          : "received"
+        : connection.status
+      : "none";
+
+    // Get follower count
     const followerCount = await ConnectionRequest.countDocuments({
       $or: [
         { recieverId: user._id, status: "accepted" },
@@ -90,6 +152,7 @@ export const getUser = async (req, res) => {
     });
 
     res.status(200).json({
+      isSelf,
       firstName: user.firstName,
       lastName: user.lastName,
       age: user.age,
@@ -97,7 +160,8 @@ export const getUser = async (req, res) => {
       userName: user.userName,
       about: user.about,
       posts,
-      connectionStatus: connection ? connection.status : "none",
+      postsCount,
+      connectionStatus,
       followerCount,
     });
   } catch (err) {

@@ -3,7 +3,6 @@ import { mapAndThrowError } from "../domain/utils";
 import { PostFormState } from "../pages/AddPost/hooks";
 import { UpdatePost } from "../pages/EditPost/hooks";
 import { FeedPost } from "../pages/Home/hooks";
-import { Post } from "../pages/Profile/hooks";
 import { apiClient } from "./apiClient";
 
 export async function createPost(request: PostFormState): Promise<void> {
@@ -23,7 +22,7 @@ export async function createPost(request: PostFormState): Promise<void> {
   }
 }
 
-export async function getUserPosts(): Promise<Post[]> {
+export async function getUserPosts(): Promise<FeedPost[]> {
   try {
     const response = await apiClient.get("/feed/myPosts");
     return response.data.data;
@@ -35,6 +34,14 @@ export async function getUserPosts(): Promise<Post[]> {
 export async function deletePost(id: string): Promise<void> {
   try {
     await apiClient.delete("/feed/" + id);
+  } catch (errr) {
+    mapAndThrowError(errr);
+  }
+}
+
+export async function deleteUserCommentPost(id: string): Promise<void> {
+  try {
+    await apiClient.delete("/engage/admin/comment/" + id);
   } catch (errr) {
     mapAndThrowError(errr);
   }

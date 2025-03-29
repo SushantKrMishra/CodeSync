@@ -59,6 +59,8 @@ export async function getUserDetails(
         gender: response.data.gender,
         about: response.data.about,
         followersCount: response.data.followerCount,
+        postCount: response.data.postsCount,
+        isSelf: response.data.isSelf,
       },
       connectionStatus: convertStringToConnectionStatus(
         response.data.connectionStatus
