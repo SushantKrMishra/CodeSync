@@ -148,7 +148,6 @@ const ConnectionsView = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            {/* Updated Sent Requests Header */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}

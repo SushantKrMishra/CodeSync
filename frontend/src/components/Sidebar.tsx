@@ -3,6 +3,7 @@ import {
   GroupAdd,
   Home,
   LinkRounded,
+  Message,
   People,
   Person,
 } from "@mui/icons-material";
@@ -34,6 +35,7 @@ const menuItems = [
   { icon: <Home />, text: "Home", path: "/" },
   { icon: <AddBox />, text: "Create Post", path: "/create-post" },
   { icon: <Person />, text: "My Profile", path: "/profile" },
+  { icon: <Message />, text: "Chats", path: "/chats" },
   {
     icon: <LinkRounded />,
     text: "Connections",

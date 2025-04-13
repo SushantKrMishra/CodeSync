@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AddPostPage } from "../pages/AddPost/AddPost";
+import ChatRoom from "../pages/Chat/ChatRoom";
 import Connections from "../pages/Connections/Connections";
 import { ConnectionsRequests } from "../pages/ConnectionsReqests/Connections";
 import { ConnectionsSuggestions } from "../pages/ConnectionSuggestion/ConnectionSuggestion";
@@ -39,6 +40,7 @@ const Body: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => {
         <Route path="/suggestions" element={<ConnectionsSuggestions />} />
         <Route path="/connections-requests" element={<ConnectionsRequests />} />
         <Route path="/connections" element={<Connections />} />
+        <Route path="/chats" element={<ChatRoom />} />
         <Route path="*" element={<>Hello World! 😠</>} />
       </Route>
     </Routes>
