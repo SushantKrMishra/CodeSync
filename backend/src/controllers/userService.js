@@ -364,3 +364,36 @@ export const getConnections = async (req, res) => {
     });
   }
 };
+
+export const getSearchSuggestions = async (req, res) => {
+  try {
+    const searchRegex = req.query.search
+      ? new RegExp(req.query.search, "i")
+      : null;
+
+    const searchConditions = searchRegex
+      ? {
+          $and: [
+            { _id: { $ne: req.user._id } },
+            {
+              $or: [
+                { firstName: searchRegex },
+                { lastName: searchRegex },
+                { userName: searchRegex },
+              ],
+            },
+          ],
+        }
+      : { _id: { $ne: req.user._id } };
+
+    const users = await User.find(
+      searchConditions,
+      "firstName lastName userName"
+    ).limit(10);
+
+    res.status(200).json({ users });
+  } catch (err) {
+    // TODO: Logger Here why it failed
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
