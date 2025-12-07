@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useIsFetching } from "@tanstack/react-query";
 import {
   accessUserChatRoom,
   createMessage,
@@ -9,6 +9,7 @@ import {
 import { MutationHookData, QueryHookData } from "../../domain/hook_data";
 import { deriveMutationState, deriveQueryState } from "../../domain/hook_impl";
 import { UserProfile } from "../Profile/hooks";
+import { useEffect, useRef } from "react";
 
 export type ChatRoom = {
   firstName: string;
@@ -81,6 +82,24 @@ export function useMessages(chatRoomId: string): QueryHookData<Message[]> {
     queryFn: () => getMessages(chatRoomId),
     enabled: chatRoomId.trim() !== "",
   });
+  const globalFetchingCount = useIsFetching();
+  const prevFetchingRef = useRef<number | null>(null);
+  const lastRefetchAt = useRef<number>(0);
+  const refetchCooldownMs = 2500;
+
+  useEffect(() => {
+    if (chatRoomId.trim() === "") return;
+
+    const prev = prevFetchingRef.current ?? globalFetchingCount;
+    if (prev > 0 && globalFetchingCount === 0) {
+      const now = Date.now();
+      if (now - lastRefetchAt.current > refetchCooldownMs) {
+        lastRefetchAt.current = now;
+        query.refetch().catch(() => {});
+      }
+    }
+    prevFetchingRef.current = globalFetchingCount;
+  }, [globalFetchingCount, chatRoomId, query]);
   return deriveQueryState(query);
 }
 
