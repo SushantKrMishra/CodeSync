@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPost } from "../../data/posts";
 import { MutationHookData } from "../../domain/hook_data";
 import { deriveMutationState } from "../../domain/hook_impl";
+import { FeedPost } from "../Home/hooks";
 
-export type PostFormState = Pick<Post, "content"> & { imageFile?: File };
+export type PostFormState = Pick<FeedPost, "content"> & { imageFile?: File };
 
 export function useCreatePost(): MutationHookData<PostFormState, void> {
   const client = useQueryClient();
