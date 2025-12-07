@@ -79,6 +79,10 @@ export const loginUser = async (req, res) => {
     //Token
     const token = await user.getJWT();
     res.cookie("codesync", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
       expires: new Date(Date.now() + 3600000 * 48),
     });
     res.status(200).json({
