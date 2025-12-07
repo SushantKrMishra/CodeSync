@@ -18,7 +18,7 @@ import { setupSocket } from "./socket.js";
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5001;
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174","https://dev-code-sync.vercel.app"];
 
 const server = createServer(app);
 export const io = new Server(server, {
