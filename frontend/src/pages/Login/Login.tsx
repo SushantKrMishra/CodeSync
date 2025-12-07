@@ -14,15 +14,40 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import ApplyModal from "../../components/ApplyingModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import { validateEmailId } from "../../domain/utils";
 import { LoginFormState, useLogin } from "./hooks";
 
 export default function Login() {
   const { invoke, isError, isPending } = useLogin();
   const navigate = useNavigate();
+  const queryParams = new URLSearchParams(window.location.search);
+  const value = queryParams.get("key");
+  const [canShowInterviewMode, setCanShowInterviewMode] = useState(false);
+
+  const isInterviewMode = useMemo(() => {
+    if (value) {
+      try {
+        const decodedUrl = decodeURIComponent(value);
+        const cleanValue = decodedUrl.replace(/^['"]|['"]$/g, "");
+        const decodedValue = window.atob(cleanValue);
+
+        const payload = new URLSearchParams(decodedValue);
+        const interviewMode = payload.get("interviewMode");
+        return interviewMode === "1";
+      } catch {
+        //swallow
+      }
+    }
+    return false;
+  }, [value]);
+
+  useEffect(() => {
+    setCanShowInterviewMode(isInterviewMode);
+  }, [isInterviewMode]);
 
   const onLogin = (data: LoginFormState) => {
     invoke(data);
@@ -34,6 +59,15 @@ export default function Login() {
       isPending={isPending}
       isError={isError}
       navigate={navigate}
+      canShowInterviewMode={canShowInterviewMode}
+      closeInterviewMode={() => {
+        setCanShowInterviewMode(false);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      }}
     />
   );
 }
@@ -43,6 +77,8 @@ type ViewProps = {
   isPending: boolean;
   isError: boolean;
   navigate: NavigateFunction;
+  canShowInterviewMode: boolean;
+  closeInterviewMode: () => void;
 };
 
 const initialFormState: LoginFormState = {
@@ -55,6 +91,8 @@ const LoginView: React.FC<ViewProps> = ({
   isPending,
   isError,
   navigate,
+  canShowInterviewMode,
+  closeInterviewMode,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState<LoginFormState>(initialFormState);
@@ -87,11 +125,30 @@ const LoginView: React.FC<ViewProps> = ({
     onSuccessfulValidation(formState);
   };
 
+  const onConfirmInterviewMode = () => {
+    setFormState({
+      emailId: "Tilda.delta@koogle.com",
+      password: "Tilda.1.Detla",
+    });
+    closeInterviewMode();
+  };
+
   useEffect(() => {
     if (isError) {
       setErrorOpen(true);
     }
   }, [isError]);
+
+  if (canShowInterviewMode) {
+    return (
+      <ConfirmationModal
+        message="An interview session has been detected. Test account credentials will be pre-filled. Do you wish to continue?"
+        show={canShowInterviewMode}
+        onCancel={closeInterviewMode}
+        onConfirm={onConfirmInterviewMode}
+      />
+    );
+  }
 
   return (
     <>

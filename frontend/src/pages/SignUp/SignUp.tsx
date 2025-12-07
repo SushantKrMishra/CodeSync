@@ -54,10 +54,10 @@ type ViewProps = {
 };
 
 const initialFormState: SignUpFormState = {
-  firstName: "Sush",
+  firstName: "",
   lastName: "",
-  emailId: "sush@test.com",
-  password: "sush@123",
+  emailId: "",
+  password: "",
 };
 
 const SignUpView: React.FC<ViewProps> = ({
@@ -82,17 +82,17 @@ const SignUpView: React.FC<ViewProps> = ({
     if (!formState.emailId) {
       newErrors.emailId = "⚠ Please enter an email Id!";
     } else if (!validateEmailId(formState.emailId)) {
-      newErrors.emailId = "❌ Please enter a valid email Id!";
+      newErrors.emailId = "Please enter a valid email Id!";
     }
 
     if (!formState.password || formState.password.length < 8) {
-      newErrors.password = "⚠ Please enter a valid password!";
+      newErrors.password = "Please enter a valid password!";
     }
 
     if (!formState.firstName) {
-      newErrors.firstName = "⚠ Please enter your first name!";
+      newErrors.firstName = "Please enter your first name!";
     } else if (formState.firstName.length < 3) {
-      newErrors.firstName = "⚠ First name should be of minimum 3 characters!";
+      newErrors.firstName = "Please enter a first name with a minimum of 3 characters!";
     }
 
     setErrors(newErrors);
