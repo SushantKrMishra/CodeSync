@@ -101,7 +101,13 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = async (req, res) => {
   res
-    .cookie("codesync", null, { expires: new Date(Date.now()) })
+    .cookie("codesync", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true, 
+      secure: true,  
+      sameSite: "none",
+      path: "/", 
+    })
     .status(200)
     .json({
       message: "Logged out successfully",
