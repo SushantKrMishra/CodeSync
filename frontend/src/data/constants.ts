@@ -1,1 +1,1 @@
-export const BASE_URL = "https://codesync-backend-h8bx.onrender.com/";
+export const BASE_URL = "https://discounts-components-nobody-bibliography.trycloudflare.com";
